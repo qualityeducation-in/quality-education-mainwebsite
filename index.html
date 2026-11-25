@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | Quality Education</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="../assets/admin.css">
+</head>
+<body class="auth" id="body">
+
+<form class="box" id="login">
+  <h1>Admin Login</h1>
+  <p>Quality Education Dashboard</p>
+  <p class="err" id="login-msg" role="status"></p>
+  <label>Email<input id="l-email" type="email" required autocomplete="username"></label>
+  <label>Password<input id="l-pass" type="password" required autocomplete="current-password"></label>
+  <button class="btn" type="submit" id="l-btn">Login</button>
+</form>
+
+<div id="app" hidden>
+  <header class="top">
+    <strong>Quality Education <span>Admin</span></strong>
+    <nav id="tabs"></nav>
+    <div class="right">
+      <a href="../index.html" target="_blank" rel="noopener">Website dekhein ↗</a>
+      <button class="link" type="button" id="logout">Logout</button>
+    </div>
+  </header>
+  <main>
+    <p class="flash" id="flash" role="status" hidden></p>
+    <div id="view"><p class="loading">Load ho raha hai…</p></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/config.js"></script>
+<script src="../assets/shared.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

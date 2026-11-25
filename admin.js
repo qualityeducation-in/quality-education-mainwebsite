@@ -1,0 +1,317 @@
+(function () {
+  var Q = window.QE, sb = Q.sb, esc = Q.esc;
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* Har list ki definition. Naya field jodna ho to yahin jodein (aur Supabase table mein column bhi). */
+  var itemFields = [
+    ["title", "Title", "text", 150, true],
+    ["exam", "Exam", "select", Q.EXAMS],
+    ["tag", "Badge (jaise Most Popular)", "text", 40],
+    ["meta", 'Highlights, " · " se alag karein (jaise 12 Months · PDF Notes)', "text", 120],
+    ["descr", "Description", "textarea", 500],
+    ["price", 'Fee ₹ (khaali = "enquiry karein")', "number"],
+    ["mrp", "MRP ₹ (kati hui keemat, optional)", "number"],
+    ["video_url", "Demo video link (YouTube ya Instagram, optional)", "text", 300],
+    ["sort", "Order (chhota number pehle)", "number"],
+    ["is_free", "Free hai", "check"],
+    ["is_active", "Website par dikhayein", "check"]
+  ];
+  var ENT = {
+    courses: { label: "Video Courses", one: "Video Course", table: "items", fixed: { kind: "course" }, fields: itemFields, cols: ["title", "exam", "price", "video_url", "is_active"] },
+    tests: { label: "Test Series", one: "Test Series", table: "items", fixed: { kind: "test" }, fields: itemFields, cols: ["title", "exam", "price", "is_active"] },
+    reels: {
+      label: "Videos / Reels", one: "Video", table: "reels", fixed: {}, cols: ["title", "url", "is_active"],
+      hint: "Instagram reel ya YouTube video ka link paste karein. Website par click karte hi video wahin popup mein chalegi. Channel ya profile ka link ho to naya tab khulega.",
+      fields: [
+        ["title", "Title", "text", 100, true],
+        ["subtitle", "Chhoti line (jaise Faculty Reel)", "text", 100],
+        ["url", "Instagram reel ya YouTube video ka link", "text", 300, true],
+        ["sort", "Order (chhota number pehle)", "number"],
+        ["is_active", "Website par dikhayein", "check"]
+      ]
+    },
+    results: {
+      label: "Results", one: "Selected Student", table: "results", fixed: {}, cols: ["name", "detail"],
+      fields: [
+        ["name", "Student ka naam", "text", 100, true],
+        ["detail", "Detail (jaise Selected in RAS 2018)", "text", 200],
+        ["sort", "Order (chhota number pehle)", "number"]
+      ]
+    }
+  };
+  var SETTINGS = [
+    ["Notice aur Contact", [
+      ["notice_text", "Upar ki notice patti (khaali = patti band)"], ["phone", "Phone / WhatsApp number"],
+      ["email", "Support email"], ["address", "Offices"]]],
+    ["Numbers (har line: number|label)", [
+      ["hero_stats", "Hero ke 4 numbers", true], ["result_stats", "Results ke numbers", true]]],
+    ["Book section", [
+      ["book_title", "Book ka title (khaali = section band)"], ["book_desc", "Book ki jaankari", true],
+      ["book_points", "Khaas baatein (har line mein ek)", true]]],
+    ["App aur Social links (khaali = nahi dikhega)", [
+      ["play_url", "Play Store link"], ["ios_url", "App Store link"], ["windows_url", "Windows app link"],
+      ["instagram", "Instagram"], ["youtube", "YouTube"], ["telegram", "Telegram"], ["whatsapp_channel", "WhatsApp Channel"],
+      ["facebook", "Facebook"], ["twitter", "Twitter / X"], ["linkedin", "LinkedIn"]]]
+  ];
+  var COL_LABEL = { is_active: "Status", video_url: "Demo video", url: "Link", price: "Fee" };
+
+  var S = { tab: "enquiries", edit: null, rows: [], enq: [], fq: "", fs: "" };
+  var view = $("view");
+
+  /* ---------- helpers ---------- */
+  var flashTimer;
+  function flash(text, bad) {
+    var f = $("flash");
+    f.textContent = text; f.className = "flash" + (bad ? " bad" : ""); f.hidden = false;
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(function () { f.hidden = true; }, 4500);
+  }
+  function fail(error) {
+    flash("Kaam nahi ho saka" + (error && error.message ? ": " + error.message : ". Dobara koshish karein."), true);
+  }
+  function fmtDate(t) {
+    return t ? new Date(t).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
+  }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  /* ---------- login ---------- */
+  function showLogin(text) {
+    $("body").className = "auth"; $("app").hidden = true; $("login").hidden = false;
+    $("login-msg").textContent = text || "";
+  }
+  function enter() {
+    sb.rpc("is_admin").then(function (r) {
+      if (r.error || r.data !== true) {
+        return sb.auth.signOut().then(function () { showLogin("Is account ko admin access nahi diya gaya hai."); });
+      }
+      $("body").className = ""; $("login").hidden = true; $("app").hidden = false;
+      drawTabs(); render();
+    });
+  }
+  $("login").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!sb) return;
+    $("l-btn").disabled = true; $("login-msg").textContent = "";
+    sb.auth.signInWithPassword({ email: $("l-email").value.trim(), password: $("l-pass").value }).then(function (r) {
+      $("l-btn").disabled = false;
+      if (r.error) return showLogin("Email ya password galat hai.");
+      $("l-pass").value = "";
+      enter();
+    });
+  });
+  $("logout").addEventListener("click", function () { sb.auth.signOut().then(function () { showLogin(""); }); });
+
+  if (!sb) {
+    showLogin("Supabase ki details nahi mili. assets/config.js mein URL aur key bharein.");
+  } else {
+    sb.auth.getSession().then(function (r) { if (r.data && r.data.session) enter(); });
+  }
+
+  /* ---------- tabs ---------- */
+  function drawTabs() {
+    var newCount = S.enq.filter(function (x) { return x.status === "new"; }).length;
+    var tabs = [["enquiries", "Enquiries" + (newCount ? " <b>" + newCount + "</b>" : "")]]
+      .concat(Object.keys(ENT).map(function (k) { return [k, ENT[k].label]; }), [["settings", "Settings"]]);
+    $("tabs").innerHTML = tabs.map(function (t) {
+      return '<button type="button" data-tab="' + t[0] + '" class="' + (S.tab === t[0] ? "on" : "") + '">' + t[1] + "</button>";
+    }).join("");
+  }
+  $("tabs").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-tab]"); if (!b) return;
+    S.tab = b.dataset.tab; S.edit = null; drawTabs(); render();
+  });
+
+  function render() {
+    view.innerHTML = '<p class="loading">Load ho raha hai…</p>';
+    if (S.tab === "enquiries") loadEnquiries();
+    else if (S.tab === "settings") loadSettings();
+    else loadEntity();
+  }
+
+  /* ---------- enquiries ---------- */
+  function loadEnquiries() {
+    sb.from("enquiries").select("*").order("id", { ascending: false }).limit(2000).then(function (r) {
+      if (r.error) return fail(r.error);
+      S.enq = r.data || []; drawTabs(); drawEnquiries();
+    });
+  }
+  function filteredEnq() {
+    var q = S.fq.toLowerCase();
+    return S.enq.filter(function (x) {
+      return (!S.fs || x.status === S.fs) && (!q || [x.name, x.phone, x.city].some(function (v) { return String(v || "").toLowerCase().indexOf(q) > -1; }));
+    });
+  }
+  function enqRows() {
+    var rows = filteredEnq();
+    if (!rows.length) return '<tr><td colspan="9" class="none">' + (S.enq.length ? "Is filter mein koi enquiry nahi hai." : "Abhi koi enquiry nahi aayi hai. Website ke form se aayi har enquiry yahan dikhegi.") + "</td></tr>";
+    return rows.map(function (x) {
+      return '<tr><td class="num">' + fmtDate(x.created_at) + "</td><td><b>" + esc(x.name) + '</b></td><td class="num"><a href="tel:+91' + esc(x.phone) + '">' + esc(x.phone) + "</a></td><td>"
+        + esc(x.exam) + "</td><td>" + esc(x.interest) + "</td><td>" + esc(x.city) + "</td><td>" + esc(x.message) + "</td>"
+        + '<td><select class="st s-' + esc(x.status) + '" data-status="' + x.id + '" aria-label="Status">' + Q.STATUSES.map(function (s) {
+          return '<option value="' + s + '"' + (s === x.status ? " selected" : "") + ">" + cap(s) + "</option>";
+        }).join("") + "</select></td>"
+        + '<td><button class="link del" type="button" data-del-enq="' + x.id + '">Delete</button></td></tr>';
+    }).join("");
+  }
+  function drawEnquiries() {
+    var c = function (k) { return S.enq.filter(function (x) { return x.status === k; }).length; };
+    view.innerHTML = "<h1>Student Enquiries</h1>"
+      + '<div class="tiles"><div class="tile"><b>' + S.enq.length + '</b><span>Total</span></div><div class="tile t-new"><b>' + c("new") + '</b><span>New</span></div>'
+      + '<div class="tile t-con"><b>' + c("contacted") + '</b><span>Contacted</span></div><div class="tile t-enr"><b>' + c("enrolled") + "</b><span>Enrolled</span></div></div>"
+      + '<div class="tools"><input type="search" id="fq" value="' + esc(S.fq) + '" placeholder="Name, mobile ya city" aria-label="Search">'
+      + '<select id="fs" aria-label="Status"><option value="">All status</option>' + Q.STATUSES.map(function (s) { return '<option value="' + s + '"' + (S.fs === s ? " selected" : "") + ">" + cap(s) + "</option>"; }).join("") + "</select>"
+      + '<button class="btn sm line" type="button" id="csv">Excel (CSV) download</button></div>'
+      + '<div class="scroll"><table><thead><tr><th>Date</th><th>Name</th><th>Mobile</th><th>Exam</th><th>Interest</th><th>City</th><th>Message</th><th>Status</th><th></th></tr></thead><tbody id="enq-body">' + enqRows() + "</tbody></table></div>";
+  }
+  function downloadCsv() {
+    // Excel formula injection se bachav: = + - @ se shuru hone wali value ke aage ' lagta hai
+    var cell = function (v) { v = String(v == null ? "" : v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+    var lines = [["Date", "Name", "Mobile", "Exam", "Interest", "City", "Message", "Status"]].concat(filteredEnq().map(function (x) {
+      return [fmtDate(x.created_at), x.name, x.phone, x.exam, x.interest, x.city, x.message, x.status];
+    })).map(function (r) { return r.map(cell).join(","); }).join("\r\n");
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["﻿" + lines], { type: "text/csv;charset=utf-8" }));
+    a.download = "enquiries-" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  /* ---------- courses / tests / reels / results ---------- */
+  function loadEntity() {
+    var E = ENT[S.tab], qy = sb.from(E.table).select("*");
+    Object.keys(E.fixed).forEach(function (k) { qy = qy.eq(k, E.fixed[k]); });
+    qy.order("sort").order("id").then(function (r) {
+      if (r.error) return fail(r.error);
+      S.rows = r.data || []; drawEntity();
+    });
+  }
+  function fieldHtml(f, cur) {
+    var k = f[0], label = esc(f[1]), type = f[2];
+    var val = cur ? cur[k] : (k === "is_active" ? true : "");
+    if (type === "check") return '<label class="check"><input type="checkbox" id="e-' + k + '"' + (val ? " checked" : "") + "> " + label + "</label>";
+    if (type === "select") return "<label>" + label + '<select id="e-' + k + '">' + f[3].map(function (o) { return "<option" + (o === val ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("") + "</select></label>";
+    if (type === "textarea") return '<label class="full">' + label + '<textarea id="e-' + k + '" rows="3" maxlength="' + f[3] + '">' + esc(val) + "</textarea></label>";
+    if (type === "number") return "<label>" + label + '<input id="e-' + k + '" inputmode="numeric" value="' + (Number(val) ? Number(val) : "") + '"></label>';
+    return '<label class="' + (f[3] > 110 ? "full" : "") + '">' + label + '<input id="e-' + k + '" maxlength="' + f[3] + '" value="' + esc(val) + '"' + (f[4] ? " required" : "") + "></label>";
+  }
+  function cellHtml(E, c, r) {
+    if (c === "is_active") return r[c] ? '<span class="live">Live</span>' : '<span class="hid">Hidden</span>';
+    if (c === "price") return r.is_free ? "Free" : (r[c] ? Q.inr(r[c]) : "—");
+    if (c === "video_url" || c === "url") {
+      if (!r[c]) return "—";
+      var short = r[c].length > 42 ? r[c].slice(0, 41) + "…" : r[c];
+      return (Q.embedUrl(r[c]) ? "Video ✓" : "Link") + " <small>" + esc(short) + "</small>";
+    }
+    return c === E.fields[0][0] ? "<b>" + esc(r[c]) + "</b>" : esc(r[c]);
+  }
+  function drawEntity() {
+    var E = ENT[S.tab], cur = null;
+    if (S.edit !== null && S.edit !== "new") {
+      cur = S.rows.filter(function (r) { return r.id === S.edit; })[0] || null;
+      if (!cur) S.edit = null;
+    }
+    var form = "";
+    if (S.edit !== null) {
+      form = '<form class="panel" id="e-form"><h2>' + (cur ? "Edit: " + esc(cur[E.fields[0][0]]) : "Naya " + esc(E.one)) + '</h2><div class="fields">'
+        + E.fields.map(function (f) { return fieldHtml(f, cur); }).join("")
+        + '</div><button class="btn" type="submit">Save</button> <button class="btn line" type="button" id="e-cancel">Cancel</button></form>';
+    }
+    view.innerHTML = '<div class="head"><h1>' + esc(E.label) + '</h1><button class="btn sm" type="button" id="e-new">+ Naya ' + esc(E.one) + "</button></div>"
+      + (E.hint ? '<p class="hint">' + esc(E.hint) + "</p>" : "") + form
+      + '<div class="scroll"><table><thead><tr>' + E.cols.map(function (c) { return "<th>" + (COL_LABEL[c] || cap(c)) + "</th>"; }).join("") + "<th></th></tr></thead><tbody>"
+      + (S.rows.length ? S.rows.map(function (r) {
+        return "<tr>" + E.cols.map(function (c) { return "<td>" + cellHtml(E, c, r) + "</td>"; }).join("")
+          + '<td class="acts"><button class="link" type="button" data-edit="' + r.id + '">Edit</button><button class="link del" type="button" data-del="' + r.id + '">Delete</button></td></tr>';
+      }).join("") : '<tr><td colspan="' + (E.cols.length + 1) + '" class="none">Abhi kuch nahi joda gaya hai. Upar ke button se jodein.</td></tr>')
+      + "</tbody></table></div>";
+  }
+  function saveEntity() {
+    var E = ENT[S.tab], data = {}, missing = null;
+    Object.keys(E.fixed).forEach(function (k) { data[k] = E.fixed[k]; });
+    E.fields.forEach(function (f) {
+      var el = $("e-" + f[0]);
+      if (f[2] === "check") data[f[0]] = el.checked;
+      else if (f[2] === "number") data[f[0]] = Math.min(Number(el.value.replace(/\D/g, "")) || 0, 100000000);
+      else data[f[0]] = el.value.trim();
+      if (f[4] && !data[f[0]] && !missing) missing = f;
+    });
+    if (missing) { flash(missing[1] + " bharna zaroori hai.", true); $("e-" + missing[0]).focus(); return; }
+    var qy = S.edit === "new" ? sb.from(E.table).insert(data) : sb.from(E.table).update(data).eq("id", S.edit);
+    qy.then(function (r) {
+      if (r.error) return fail(r.error);
+      S.edit = null; flash(E.one + " save ho gaya."); loadEntity();
+    });
+  }
+
+  /* ---------- settings ---------- */
+  function loadSettings() {
+    sb.from("settings").select("*").then(function (r) {
+      if (r.error) return fail(r.error);
+      var s = {};
+      (r.data || []).forEach(function (row) { s[row.k] = row.v; });
+      view.innerHTML = '<h1>Settings</h1><form class="panel" id="s-form">' + SETTINGS.map(function (g) {
+        return "<h2>" + esc(g[0]) + '</h2><div class="fields">' + g[1].map(function (f) {
+          return f[2] ? '<label class="full">' + esc(f[1]) + '<textarea id="s-' + f[0] + '" rows="4">' + esc(s[f[0]]) + "</textarea></label>"
+            : "<label>" + esc(f[1]) + '<input id="s-' + f[0] + '" value="' + esc(s[f[0]]) + '"></label>';
+        }).join("") + "</div>";
+      }).join("") + '<button class="btn" type="submit">Settings Save Karein</button></form>'
+        + '<form class="panel" id="p-form" style="max-width:520px"><h2>Password badlein</h2><div class="fields">'
+        + '<label class="full">Naya password (kam se kam 8 akshar)<input type="password" id="p-new" required minlength="8" autocomplete="new-password"></label>'
+        + '<label class="full">Naya password dobara<input type="password" id="p-again" required autocomplete="new-password"></label>'
+        + '</div><button class="btn" type="submit">Password Badlein</button></form>';
+    });
+  }
+
+  /* ---------- events inside the view ---------- */
+  view.addEventListener("input", function (e) {
+    if (e.target.id === "fq") { S.fq = e.target.value.trim(); $("enq-body").innerHTML = enqRows(); }
+  });
+  view.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.id === "fs") { S.fs = t.value; $("enq-body").innerHTML = enqRows(); }
+    if (t.dataset.status) {
+      sb.from("enquiries").update({ status: t.value }).eq("id", Number(t.dataset.status)).then(function (r) {
+        if (r.error) return fail(r.error);
+        loadEnquiries();
+      });
+    }
+  });
+  view.addEventListener("click", function (e) {
+    var t = e.target.closest("button"); if (!t) return;
+    if (t.id === "csv") return downloadCsv();
+    if (t.id === "e-new") { S.edit = "new"; return drawEntity(); }
+    if (t.id === "e-cancel") { S.edit = null; return drawEntity(); }
+    if (t.dataset.edit) { S.edit = Number(t.dataset.edit); drawEntity(); return window.scrollTo(0, 0); }
+    if (t.dataset.del && window.confirm("Delete karein?")) {
+      var E = ENT[S.tab];
+      sb.from(E.table).delete().eq("id", Number(t.dataset.del)).then(function (r) {
+        if (r.error) return fail(r.error);
+        flash(E.one + " delete ho gaya."); loadEntity();
+      });
+    }
+    if (t.dataset.delEnq && window.confirm("Yeh enquiry delete karein?")) {
+      sb.from("enquiries").delete().eq("id", Number(t.dataset.delEnq)).then(function (r) {
+        if (r.error) return fail(r.error);
+        flash("Enquiry delete ho gayi."); loadEnquiries();
+      });
+    }
+  });
+  view.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (e.target.id === "e-form") return saveEntity();
+    if (e.target.id === "s-form") {
+      var rows = [];
+      SETTINGS.forEach(function (g) { g[1].forEach(function (f) { rows.push({ k: f[0], v: $("s-" + f[0]).value.trim().slice(0, 2000) }); }); });
+      sb.from("settings").upsert(rows).then(function (r) { r.error ? fail(r.error) : flash("Settings save ho gayi."); });
+    }
+    if (e.target.id === "p-form") {
+      var p = $("p-new").value;
+      if (p.length < 8) return flash("Password kam se kam 8 akshar ka rakhein.", true);
+      if (p !== $("p-again").value) return flash("Dono password alag hain.", true);
+      sb.auth.updateUser({ password: p }).then(function (r) {
+        if (r.error) return fail(r.error);
+        e.target.reset(); flash("Password badal gaya.");
+      });
+    }
+  });
+})();
