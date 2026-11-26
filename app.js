@@ -1,16 +1,10 @@
+// Home page (index.html) ka code. Card, reels aur text ka common code cards.js mein hai.
 (function () {
-  var Q = window.QE, sb = Q.sb, esc = Q.esc;
+  var Q = window.QE, sb = Q.sb, esc = Q.esc, T = Q.T, icon = Q.icon;
   var $ = function (id) { return document.getElementById(id); };
-  var icon = function (n) { return '<svg class="i"><use href="#i-' + n + '"/></svg>'; };
+  Q.onHome = true;
 
-  var SET = {};      // settings table ki saari values
-  var ITEMS = null;  // courses, tests, books (load hone ke baad)
-
-  // Website ka text: admin mein badla ho to wo, warna default (shared.js ki list se).
-  function T(key) { return (SET["t_" + key] || "").trim() || Q.TEXT[key] || ""; }
-  function applyTexts() {
-    document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = T(el.dataset.t); });
-  }
+  var ITEMS = [], REELS = [], courseFilter = "";
 
   function buildExams() {
     $("strip").innerHTML = [0, 1, 2, 3].map(function () {
@@ -24,77 +18,81 @@
   $("year").textContent = new Date().getFullYear();
   buildExams();
 
-  /* ---------- menu, enquiry buttons, video popup ---------- */
+  /* ---------- menu, enquiry buttons, filter ---------- */
   var nav = $("nav"), menuBtn = $("menu-btn");
   menuBtn.addEventListener("click", function () { menuBtn.setAttribute("aria-expanded", nav.classList.toggle("open")); });
   nav.addEventListener("click", function (e) { if (e.target.closest("a")) nav.classList.remove("open"); });
 
-  var dlg = $("vid"), frame = dlg.querySelector("iframe");
-  dlg.querySelector("button").addEventListener("click", function () { dlg.close(); });
-  dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
-  dlg.addEventListener("close", function () { frame.src = "about:blank"; });
-
+  function fillForm(exam, interest, msg) {
+    $("f-exam").value = exam;
+    if (!$("f-exam").value) $("f-exam").value = "Other";
+    if (Q.INTERESTS.indexOf(interest) > -1) $("f-interest").value = interest;
+    $("f-msg").value = String(msg || "").slice(0, 500);
+  }
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-enq]");
-    if (b) {
-      $("f-exam").value = b.dataset.exam;
-      if (!$("f-exam").value) $("f-exam").value = "Other";
-      $("f-interest").value = b.dataset.int;
-      $("f-msg").value = b.dataset.msg || "";
-    }
-    var rl = e.target.closest(".reel[data-embed]");
-    if (rl) {
-      if (e.target.closest(".r-close")) stopReel();
-      else if (!rl.classList.contains("playing")) playReel(rl);
-      return;
-    }
-    var v = e.target.closest("[data-embed]");
-    if (v) {
-      dlg.classList.toggle("tall", v.dataset.embed.indexOf("instagram.com") > -1);
-      frame.src = v.dataset.embed;
-      dlg.showModal();
-    }
+    if (b) fillForm(b.dataset.exam, b.dataset.int, b.dataset.msg);
     var c = e.target.closest("#course-chips [data-f]");
-    if (c) {
-      document.querySelectorAll("#course-chips .chip").forEach(function (x) { x.setAttribute("aria-pressed", x === c); });
-      document.querySelectorAll("#course-grid .course").forEach(function (card) {
-        card.hidden = !!c.dataset.f && card.dataset.exam !== c.dataset.f;
-      });
-    }
+    if (c) { courseFilter = c.dataset.f; renderCourses(); }
   });
 
+  /* ---------- side mein khiskne wali line (slider) ke teer ---------- */
+  var sliders = [].map.call(document.querySelectorAll(".slider"), function (s) {
+    var track = s.querySelector(".grid3, .reels"), prev = s.querySelector(".s-prev"), next = s.querySelector(".s-next");
+    var update = function () {
+      prev.hidden = track.scrollLeft <= 4;
+      next.hidden = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+    };
+    var move = function (dir) {
+      track.scrollBy({ left: dir * Math.max(280, track.clientWidth * 0.8), behavior: "smooth" });
+      setTimeout(update, 250); setTimeout(update, 700); // scroll khatam hone ke baad teer sahi dikhein
+    };
+    prev.addEventListener("click", function () { move(-1); });
+    next.addEventListener("click", function () { move(1); });
+    track.addEventListener("scroll", update, { passive: true });
+    return { track: track, update: update };
+  });
+  function updateSliders() { sliders.forEach(function (s) { s.update(); }); }
+  window.addEventListener("resize", updateSliders);
+  window.addEventListener("load", updateSliders);
+
   /* ---------- rendering ---------- */
-  function grad(s) {
-    var n = 0; s = String(s);
-    for (var i = 0; i < s.length; i++) n += s.charCodeAt(i);
-    return "g" + (n % 4);
-  }
-  function enq(exam, interest, msg) {
-    return 'href="#contact" data-enq data-exam="' + esc(exam) + '" data-int="' + esc(interest) + '" data-msg="' + esc(msg) + '"';
-  }
-  function card(x, kind) {
-    var price;
-    if (x.is_free) price = '<span class="price" style="color:var(--emerald)">Free</span>';
-    else if (x.price > 0) price = '<span class="price">' + Q.inr(x.price) + (x.mrp > x.price ? "<s>" + Q.inr(x.mrp) + "</s>" : "") + "</span>";
-    else price = '<span class="price"><small>' + esc(T("fee_note")) + "</small></span>";
-    var tag = x.tag || (x.is_free ? "Free" : "");
-    var meta = String(x.meta || "").split("·").map(function (m) { return m.trim(); }).filter(Boolean)
-      .map(function (m) { return "<b>" + esc(m) + "</b>"; }).join("");
-    var embed = Q.embedUrl(x.video_url), photo = Q.safeLink(x.image_url), isBook = kind === "Book";
-    // Thumbnail ho to wahi dikhta hai, usi jagah aur usi size mein. Na ho to exam ke naam wala rangeen design.
-    var top = photo
-      ? '<div class="c-img has-img"><img src="' + esc(photo) + '" alt="" loading="lazy"></div>'
-      : '<div class="c-img ' + grad(x.exam) + '">' + esc(x.exam === "Other" ? "QE" : x.exam) + "</div>";
-    return '<article class="course" data-exam="' + esc(x.exam) + '">' + top + '<div class="c-body">'
-      + (tag ? '<span class="c-tag ' + (x.is_free ? "free" : "") + '">' + esc(tag) + "</span>" : "")
-      + "<h3>" + esc(x.title) + "</h3><p>" + esc(x.descr) + "</p>"
-      + (meta ? '<div class="c-meta">' + meta + "</div>" : "")
-      + '<div class="c-foot">' + price + '<span class="btns">'
-      + (embed ? '<button class="btn line sm" type="button" data-embed="' + esc(embed) + '">' + esc(T("btn_demo")) + "</button>" : "")
-      + '<a class="btn sm" ' + enq(x.exam, kind, x.title + (isBook ? " order karni hai." : " ke baare mein jaankari chahiye.")) + ">"
-      + esc(T(isBook ? "btn_order" : "btn_enquire")) + "</a></span></div></div></article>";
-  }
   var note = function (t) { return '<p class="load-note">' + t + "</p>"; };
+  var ofKind = function (k) { return ITEMS.filter(function (x) { return x.kind === k; }); };
+
+  // Pehle 8 item ek line mein, zyada hon to aakhir mein "View All" card aur upar "View All" link.
+  function fillLine(gridId, type, rows, emptyText, moreCls) {
+    var t = Q.TYPES[type], more = rows.length > Q.LIMIT;
+    var grid = $(gridId);
+    grid.innerHTML = rows.length
+      ? rows.slice(0, Q.LIMIT).map(function (x) { return Q.cardHtml(x, t.interest); }).join("") + (more ? Q.moreHtml(type, moreCls) : "")
+      : (emptyText ? note(emptyText) : "");
+    grid.scrollLeft = 0;
+    $(type + "-all").hidden = !more;
+  }
+
+  function renderCourses() {
+    var courses = ofKind("course");
+    // Filter ke button usi kram mein jis kram mein exams ki list hai.
+    var exams = courses.map(function (c) { return c.exam; }).filter(function (e, i, a) { return a.indexOf(e) === i; });
+    exams.sort(function (a, b) {
+      var ia = Q.EXAMS.indexOf(a), ib = Q.EXAMS.indexOf(b);
+      return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+    });
+    if (exams.indexOf(courseFilter) < 0) courseFilter = "";
+    $("course-chips").innerHTML = exams.length > 1
+      ? '<button class="chip" type="button" aria-pressed="' + (courseFilter === "") + '" data-f="">' + esc(T("chip_all")) + "</button>" + exams.map(function (e) {
+        return '<button class="chip" type="button" aria-pressed="' + (courseFilter === e) + '" data-f="' + esc(e) + '">' + esc(e) + "</button>";
+      }).join("") : "";
+    var shown = courses.filter(function (c) { return !courseFilter || c.exam === courseFilter; });
+    fillLine("course-grid", "courses", shown, "Naye courses jald aa rahe hain. Jaankari ke liye enquiry bhejein.");
+    // "View All" usi exam ki list khole jo abhi chuni hui hai.
+    var href = "all.html?type=courses" + (courseFilter ? "&exam=" + encodeURIComponent(courseFilter) : "");
+    $("courses-all").href = href;
+    var card = $("course-grid").querySelector(".more-card");
+    if (card) card.href = href;
+    updateSliders();
+  }
 
   // Books section: upar ka banner (Settings se) aur neeche books ki list (admin > Books se).
   var hasBanner = false, hasBooks = false;
@@ -105,80 +103,23 @@
   }
 
   function renderItems() {
-    var items = ITEMS || [];
-    var of = function (k) { return items.filter(function (x) { return x.kind === k; }); };
-    var courses = of("course"), tests = of("test"), books = of("book");
-    // Filter ke button usi kram mein jis kram mein exams ki list hai.
-    var exams = courses.map(function (c) { return c.exam; }).filter(function (e, i, a) { return a.indexOf(e) === i; });
-    exams.sort(function (a, b) {
-      var ia = Q.EXAMS.indexOf(a), ib = Q.EXAMS.indexOf(b);
-      return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
-    });
-    $("course-chips").innerHTML = exams.length > 1
-      ? '<button class="chip" type="button" aria-pressed="true" data-f="">' + esc(T("chip_all")) + "</button>" + exams.map(function (e) {
-        return '<button class="chip" type="button" aria-pressed="false" data-f="' + esc(e) + '">' + esc(e) + "</button>";
-      }).join("") : "";
-    $("course-grid").innerHTML = courses.length ? courses.map(function (c) { return card(c, "Video Course"); }).join("") : note("Naye courses jald aa rahe hain. Jaankari ke liye enquiry bhejein.");
-    $("test-grid").innerHTML = tests.length ? tests.map(function (t) { return card(t, "Test Series"); }).join("") : note("Nayi test series jald aa rahi hain.");
-    $("book-grid").innerHTML = books.map(function (b) { return card(b, "Book"); }).join("");
+    renderCourses();
+    fillLine("test-grid", "tests", ofKind("test"), "Nayi test series jald aa rahi hain.", "on-dark");
+    var books = ofKind("book");
+    fillLine("book-grid", "books", books, "");
     hasBooks = books.length > 0;
     showBooks();
+    updateSliders();
   }
 
-  // Reel usi box mein chalti hai jisme uski thumbnail hai. Ek samay mein ek hi reel chalti hai.
-  var playing = null, playingHtml = "";
-  function stopReel() {
-    if (!playing) return;
-    playing.classList.remove("playing");
-    playing.innerHTML = playingHtml;
-    playing = null;
-  }
-  function playReel(card) {
-    stopReel();
-    playing = card; playingHtml = card.innerHTML;
-    var ig = card.dataset.kind === "ig", f = document.createElement("iframe");
-    f.title = "Video";
-    f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
-    f.allowFullscreen = true;
-    f.src = card.dataset.embed + (ig ? "" : "?autoplay=1&playsinline=1&rel=0");
-    if (ig) {
-      // Instagram ka player 326px se chhota nahi banta, isliye use box ke hisaab se chhota karke dikhate hain.
-      var w = card.clientWidth, h = card.clientHeight, k = Math.min(1, w / 326);
-      f.style.cssText = "width:" + (w / k) + "px;height:" + (h / k) + "px;transform:scale(" + k + ");transform-origin:0 0";
-    }
-    card.classList.add("playing");
-    card.innerHTML = '<button class="r-close" type="button" aria-label="Video band karein">✕</button>';
-    card.appendChild(f);
-  }
-  document.addEventListener("keydown", function (e) {
-    if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".reel[data-embed]:not(.playing)")) {
-      e.preventDefault(); playReel(e.target);
-    }
-  });
-
-  // Thumbnail load na ho paye to tooti hui photo ki jagah rangeen design dikhta hai.
-  document.addEventListener("error", function (e) {
-    var t = e.target;
-    if (!t.classList || !t.classList.contains("r-img")) return;
-    var c = t.closest(".reel");
-    if (c) c.classList.remove("has-img");
-    t.remove();
-  }, true);
-
-  function renderReels(reels) {
-    stopReel();
-    var html = reels.map(function (r, i) {
-      var info = Q.videoInfo(r.url), link = Q.safeLink(r.url);
-      var thumb = Q.safeLink(r.image_url) || (info ? info.thumb : "");
-      var inner = (thumb ? '<img class="r-img" src="' + esc(thumb) + '" alt="" loading="lazy">' : "")
-        + '<span class="play">' + icon("play") + "</span><h3>" + esc(r.title) + "</h3><p>" + esc(r.subtitle) + "</p>";
-      var cls = "reel g" + (i % 4) + (thumb ? " has-img" : "");
-      if (info) return '<div class="' + cls + '" role="button" tabindex="0" data-kind="' + info.type + '" data-embed="' + esc(info.embed) + '">' + inner + "</div>";
-      if (link) return '<a class="' + cls + '" href="' + esc(link) + '" target="_blank" rel="noopener">' + inner + "</a>";
-      return "";
-    }).join("");
-    $("reel-grid").innerHTML = html;
+  function renderReels() {
+    Q.stopReel();
+    var html = REELS.slice(0, Q.LIMIT).map(Q.reelHtml).join("");
+    var more = REELS.length > Q.LIMIT;
+    $("reel-grid").innerHTML = html + (html && more ? Q.moreHtml("reels", "tall") : "");
+    $("reels-all").hidden = !more;
     $("faculty").hidden = !html;
+    updateSliders();
   }
 
   function renderResults(rows) {
@@ -190,26 +131,25 @@
   function renderApps() {
     var apps = [["mobile", "app1", "play_url"], ["tablet", "app2", "ios_url"], ["screen", "app3", "windows_url"]];
     $("app-grid").innerHTML = apps.map(function (a) {
-      var link = Q.safeLink(SET[a[2]]), name = T(a[1] + "_t");
+      var link = Q.safeLink(Q.SET[a[2]]), name = T(a[1] + "_t");
       return '<div class="app"><i>' + icon(a[0]) + "</i><h3>" + esc(name) + "</h3><p>" + esc(T(a[1] + "_d")) + "</p>"
         + (link ? '<a class="btn dark" href="' + esc(link) + '" target="_blank" rel="noopener">' + esc(T(a[1] + "_btn")) + "</a>"
-          : '<a class="btn line" ' + enq("Other", "Video Course", name + " ka link chahiye.") + ">" + esc(T("app_ask")) + "</a>")
+          : '<a class="btn line" ' + Q.enqAttrs("Other", "Video Course", name + " ka link chahiye.") + ">" + esc(T("app_ask")) + "</a>")
         + "</div>";
     }).join("");
   }
 
   function renderSettings() {
-    var get = function (k) { return (SET[k] || "").trim(); };
+    var get = function (k) { return (Q.SET[k] || "").trim(); };
 
-    Q.setExams(get("exams"));
     buildExams();
-    applyTexts();
+    Q.applyTexts();
     document.title = T("brand_name") + " | " + T("brand_tag");
 
     $("notice-text").textContent = get("notice_text");
     $("notice").hidden = !get("notice_text");
 
-    var social = [["Instagram", "instagram"],["YouTube", "youtube"], ["Telegram", "telegram"], ["WhatsApp Channel", "whatsapp_channel"],
+    var social = [["Instagram", "instagram"], ["YouTube", "youtube"], ["Telegram", "telegram"], ["WhatsApp Channel", "whatsapp_channel"],
       ["Facebook", "facebook"], ["Twitter / X", "twitter"], ["LinkedIn", "linkedin"], [T("nav_app"), "play_url"]]
       .map(function (p) { return [p[0], Q.safeLink(get(p[1]))]; }).filter(function (p) { return p[1]; });
     $("connect-dd").innerHTML = social.map(function (p) { return '<a href="' + esc(p[1]) + '" target="_blank" rel="noopener">' + esc(p[0]) + "</a>"; }).join("");
@@ -238,12 +178,21 @@
     renderApps();
   }
 
+  // "View All" page ke Enquire button se aaye hon to form pehle se bhara mile.
+  function fromOtherPage() {
+    var p = new URLSearchParams(location.search);
+    if (!p.get("int")) return;
+    fillForm(p.get("exam") || "", p.get("int"), p.get("msg") || "");
+    $("contact").scrollIntoView();
+  }
+
   /* ---------- load from Supabase ---------- */
   function failed() {
     var t = "Abhi list load nahi ho saki. Thodi der baad dobara dekhein ya humein call karein.";
     $("course-grid").innerHTML = note(t);
     $("test-grid").innerHTML = note(t);
     renderApps();
+    fromOtherPage();
   }
 
   if (!sb) {
@@ -256,12 +205,14 @@
       sb.from("settings").select("*")
     ]).then(function (r) {
       if (r[0].error || r[3].error) return failed();
-      (r[3].data || []).forEach(function (row) { SET[row.k] = row.v; });
+      Q.loadSettings(r[3].data);
       ITEMS = r[0].data || [];
+      REELS = r[1].data || [];
       renderSettings();
       renderItems();
-      renderReels(r[1].data || []);
+      renderReels();
       renderResults(r[2].data || []);
+      fromOtherPage();
     }).catch(failed);
   }
 

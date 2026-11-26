@@ -380,3 +380,56 @@ nav>a,.connect>button{padding:8px 9px;font-size:.92rem}
   .reels>.reel.playing{padding:0}
   .reels>.reel:only-child{margin:0 auto}
 }
+
+/* ---------- thumbnail poori dikhe: photo wali jagah 16:9 ---------- */
+.c-img{height:auto!important;aspect-ratio:16/9}
+
+/* ---------- ek line mein side mein khiskne wale card (computer par bhi) ---------- */
+.slider{position:relative}
+.grid3{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;margin:0 -6px;padding:6px 6px 30px;scroll-behavior:smooth}
+.grid3::-webkit-scrollbar,.reels::-webkit-scrollbar{display:none}
+.grid3>.course{flex:0 0 300px;scroll-snap-align:start}
+.grid3>.load-note{flex:1}
+.reels{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;margin:0 -6px;padding:6px 6px 30px;scroll-behavior:smooth}
+.reels>.reel{scroll-snap-align:start}
+.reels>:first-child{margin-left:auto}
+.reels>:last-child{margin-right:auto}
+.s-btn{position:absolute;top:calc(50% - 12px);transform:translateY(-50%);z-index:5;width:46px;height:46px;border-radius:50%;border:0;background:#fff;color:var(--ink);font-size:1.7rem;line-height:1;padding:0 0 4px;box-shadow:0 10px 26px -8px rgba(10,22,64,.55),inset 0 0 0 1px var(--line)}
+.s-btn:hover{background:var(--saffron);color:#fff}
+.s-prev{left:-20px}
+.s-next{right:-20px}
+.va-row{display:flex;justify-content:flex-end;min-height:8px;margin:-8px 0 8px}
+.view-all{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-weight:700;font-size:.92rem;color:var(--saffron)}
+.view-all:hover{text-decoration:underline}
+.dark .view-all{color:var(--saffron-2)}
+.more-card{flex:0 0 210px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:var(--r);border:2px dashed #C3CBE0;font-family:var(--display);font-weight:700;color:var(--saffron);scroll-snap-align:start;text-align:center;padding:20px}
+.more-card span{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--saffron),var(--saffron-2));color:#fff;font-size:1.2rem}
+.more-card:hover{background:#FFF6EC;border-color:var(--saffron)}
+.more-card.on-dark{border-color:rgba(255,255,255,.3);color:#fff}
+.more-card.on-dark:hover{background:rgba(255,255,255,.08)}
+.more-card.tall{flex-basis:200px;border-radius:22px}
+
+/* ---------- "View All" page ---------- */
+.all-page .navbar .back{margin-left:auto;font-weight:600;color:var(--muted);padding:8px 10px;border-radius:9px}
+.all-page .navbar .back:hover{background:var(--bg);color:var(--ink)}
+.all-page main{min-height:70vh}
+.all-page .title .count{display:block;margin-top:8px;color:var(--muted);font-size:.9rem}
+.grid-all{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:24px}
+.grid-all .load-note{grid-column:1/-1}
+.reels.wrap-all{flex-wrap:wrap;justify-content:center;overflow:visible;margin:0;padding:0}
+.reels.wrap-all>*{margin:0}
+
+@media (max-width:640px){
+  .s-btn{display:none}
+  .grid3{gap:14px;margin:0 -16px;padding:6px 16px 20px;scroll-snap-type:x mandatory}
+  .grid3>.course{flex:0 0 80%;max-width:310px;scroll-snap-align:center}
+  .grid3>.course:only-child{flex-basis:100%;max-width:none}
+  .reels{gap:14px;margin:0 -16px;padding:6px 16px 20px;scroll-snap-type:x mandatory}
+  .more-card{flex-basis:150px;font-size:.9rem}
+  .more-card.tall{flex-basis:140px}
+  .va-row{margin:-6px 0 6px}
+  .grid-all{grid-template-columns:1fr;gap:16px}
+  .all-page .navbar .hdr-cta{display:none}
+  .reels.wrap-all{gap:12px}
+  .reels.wrap-all>.reel{flex:0 0 calc(50% - 6px);max-width:none}
+}

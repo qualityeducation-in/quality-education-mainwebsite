@@ -84,6 +84,7 @@
     ["Courses section", [
       ["courses_eyebrow", "Chhoti heading", "Premium Learning Programs"], ["courses_title", "Badi heading", "Featured Courses"],
       ["chip_all", "Filter ka pehla button", "All"],
+      ["view_all", "Saare dekhne ka button (8 se zyada hone par)", "View All"],
       ["btn_enquire", "Card ka button", "Enquire"], ["btn_demo", "Demo video ka button", "Watch Demo"],
       ["fee_note", "Fee khaali hone par dikhne wali line", "Fee ke liye enquiry karein"]]],
     ["Test Series section", [

@@ -89,7 +89,8 @@
 <section class="sec" id="courses"><div class="wrap">
   <div class="title"><p data-t="courses_eyebrow">Premium Learning Programs</p><h2 data-t="courses_title">Featured Courses</h2></div>
   <div class="chips" id="course-chips"></div>
-  <div class="grid3" id="course-grid"><p class="load-note">Courses load ho rahe hain…</p></div>
+  <div class="va-row"><a class="view-all" id="courses-all" href="all.html?type=courses" hidden><span data-t="view_all">View All</span> <svg class="i"><use href="#i-arrow"/></svg></a></div>
+  <div class="slider"><button class="s-btn s-prev" type="button" aria-label="Pichhe khiskayein" hidden>&#8249;</button><div class="grid3" id="course-grid"><p class="load-note">Courses load ho rahe hain…</p></div><button class="s-btn s-next" type="button" aria-label="Aage khiskayein" hidden>&#8250;</button></div>
 </div></section>
 
 <section class="sec dark" id="tests"><div class="wrap">
@@ -100,7 +101,8 @@
     <div><i><svg class="i"><use href="#i-chart"/></svg></i><h3 data-t="feat3_t">Detailed Analysis</h3><p data-t="feat3_d">Rank, accuracy, speed and subject performance.</p></div>
     <div><i><svg class="i"><use href="#i-trophy"/></svg></i><h3 data-t="feat4_t">Leaderboard</h3><p data-t="feat4_d">State level ranking and topper performance.</p></div>
   </div>
-  <div class="grid3" id="test-grid" style="color:var(--ink)"><p class="load-note">Test series load ho rahi hain…</p></div>
+  <div class="va-row"><a class="view-all" id="tests-all" href="all.html?type=tests" hidden><span data-t="view_all">View All</span> <svg class="i"><use href="#i-arrow"/></svg></a></div>
+  <div class="slider"><button class="s-btn s-prev" type="button" aria-label="Pichhe khiskayein" hidden>&#8249;</button><div class="grid3" id="test-grid" style="color:var(--ink)"><p class="load-note">Test series load ho rahi hain…</p></div><button class="s-btn s-next" type="button" aria-label="Aage khiskayein" hidden>&#8250;</button></div>
 </div></section>
 
 <section class="sec" id="books" hidden><div class="wrap">
@@ -115,12 +117,14 @@
     <div class="cover" aria-hidden="true"><small data-t="cover_top">Quality Education</small><h3 data-t="cover_title">Science</h3><p data-t="cover_sub">LDC 2026</p><b data-t="cover_badge">Free PYQ Booklet</b></div>
   </div>
   <div class="title" id="book-list-title" style="margin-top:56px" hidden><p data-t="books_eyebrow">Book Store</p><h2 data-t="books_title">Our Books</h2></div>
-  <div class="grid3" id="book-grid"></div>
+  <div class="va-row"><a class="view-all" id="books-all" href="all.html?type=books" hidden><span data-t="view_all">View All</span> <svg class="i"><use href="#i-arrow"/></svg></a></div>
+  <div class="slider"><button class="s-btn s-prev" type="button" aria-label="Pichhe khiskayein" hidden>&#8249;</button><div class="grid3" id="book-grid"></div><button class="s-btn s-next" type="button" aria-label="Aage khiskayein" hidden>&#8250;</button></div>
 </div></section>
 
 <section class="sec" id="faculty" style="padding-top:0" hidden><div class="wrap">
   <div class="title"><p data-t="faculty_eyebrow">Teachers + Reels</p><h2 data-t="faculty_title">Faculty Highlights</h2></div>
-  <div class="reels" id="reel-grid"></div>
+  <div class="va-row"><a class="view-all" id="reels-all" href="all.html?type=reels" hidden><span data-t="view_all">View All</span> <svg class="i"><use href="#i-arrow"/></svg></a></div>
+  <div class="slider"><button class="s-btn s-prev" type="button" aria-label="Pichhe khiskayein" hidden>&#8249;</button><div class="reels" id="reel-grid"></div><button class="s-btn s-next" type="button" aria-label="Aage khiskayein" hidden>&#8250;</button></div>
 </div></section>
 
 <section class="sec" id="resources" style="padding-top:0"><div class="wrap">
@@ -202,6 +206,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="shared.js"></script>
+<script src="cards.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

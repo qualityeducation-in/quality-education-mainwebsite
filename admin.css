@@ -87,3 +87,5 @@ td.acts button{margin-left:10px}
 .savebar{position:sticky;bottom:0;background:var(--bg);padding:12px 0;border-top:1px solid var(--line)}
 td .mini{width:72px;height:24px;object-fit:cover;border-radius:5px;display:block}
 .thumb.tall{width:126px;aspect-ratio:9/16}
+.thumb{aspect-ratio:16/9;width:240px}
+.thumb.tall{width:126px;aspect-ratio:9/16}

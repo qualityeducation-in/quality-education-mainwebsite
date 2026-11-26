@@ -220,7 +220,7 @@
         + '<div class="imgctl"><input type="file" id="e-' + k + '-file" accept="image/png,image/jpeg,image/webp" aria-label="' + label + '">'
         + '<input type="hidden" id="e-' + k + '" value="' + esc(url) + '">'
         + '<button class="link del" type="button" data-clear-img="' + k + '"' + (url ? "" : " hidden") + ">Photo hatayein</button>"
-        + "<small>" + esc(f[3] || "Sabse achha size 1200 × 400 (chaudi patti). Card ka size nahi badlega: photo usi jagah mein fit hogi aur zaroorat ho to upar-neeche se thodi kategi, isliye zaroori cheez beech mein rakhein. JPG, PNG ya WebP.") + "</small></div></div></div>";
+        + "<small>" + esc(f[3] || "Sabse achha size 1280 × 720 (YouTube thumbnail jaisa, 16:9). Is naap ki photo card par poori dikhti hai, kuch nahi katta. JPG, PNG ya WebP.") + "</small></div></div></div>";
     }
     if (type === "textarea") return '<label class="full">' + label + '<textarea id="e-' + k + '" rows="3" maxlength="' + f[3] + '">' + esc(val) + "</textarea></label>";
     if (type === "number") return "<label>" + label + '<input id="e-' + k + '" inputmode="numeric" value="' + (Number(val) ? Number(val) : "") + '"></label>';
