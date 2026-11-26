@@ -42,6 +42,12 @@
       $("f-interest").value = b.dataset.int;
       $("f-msg").value = b.dataset.msg || "";
     }
+    var rl = e.target.closest(".reel[data-embed]");
+    if (rl) {
+      if (e.target.closest(".r-close")) stopReel();
+      else if (!rl.classList.contains("playing")) playReel(rl);
+      return;
+    }
     var v = e.target.closest("[data-embed]");
     if (v) {
       dlg.classList.toggle("tall", v.dataset.embed.indexOf("instagram.com") > -1);
@@ -119,12 +125,56 @@
     showBooks();
   }
 
+  // Reel usi box mein chalti hai jisme uski thumbnail hai. Ek samay mein ek hi reel chalti hai.
+  var playing = null, playingHtml = "";
+  function stopReel() {
+    if (!playing) return;
+    playing.classList.remove("playing");
+    playing.innerHTML = playingHtml;
+    playing = null;
+  }
+  function playReel(card) {
+    stopReel();
+    playing = card; playingHtml = card.innerHTML;
+    var ig = card.dataset.kind === "ig", f = document.createElement("iframe");
+    f.title = "Video";
+    f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+    f.allowFullscreen = true;
+    f.src = card.dataset.embed + (ig ? "" : "?autoplay=1&playsinline=1&rel=0");
+    if (ig) {
+      // Instagram ka player 326px se chhota nahi banta, isliye use box ke hisaab se chhota karke dikhate hain.
+      var w = card.clientWidth, h = card.clientHeight, k = Math.min(1, w / 326);
+      f.style.cssText = "width:" + (w / k) + "px;height:" + (h / k) + "px;transform:scale(" + k + ");transform-origin:0 0";
+    }
+    card.classList.add("playing");
+    card.innerHTML = '<button class="r-close" type="button" aria-label="Video band karein">✕</button>';
+    card.appendChild(f);
+  }
+  document.addEventListener("keydown", function (e) {
+    if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".reel[data-embed]:not(.playing)")) {
+      e.preventDefault(); playReel(e.target);
+    }
+  });
+
+  // Thumbnail load na ho paye to tooti hui photo ki jagah rangeen design dikhta hai.
+  document.addEventListener("error", function (e) {
+    var t = e.target;
+    if (!t.classList || !t.classList.contains("r-img")) return;
+    var c = t.closest(".reel");
+    if (c) c.classList.remove("has-img");
+    t.remove();
+  }, true);
+
   function renderReels(reels) {
+    stopReel();
     var html = reels.map(function (r, i) {
-      var inner = '<span class="play">' + icon("play") + "</span><h3>" + esc(r.title) + "</h3><p>" + esc(r.subtitle) + "</p>";
-      var embed = Q.embedUrl(r.url), link = Q.safeLink(r.url);
-      if (embed) return '<button class="reel g' + (i % 4) + '" type="button" data-embed="' + esc(embed) + '">' + inner + "</button>";
-      if (link) return '<a class="reel g' + (i % 4) + '" href="' + esc(link) + '" target="_blank" rel="noopener">' + inner + "</a>";
+      var info = Q.videoInfo(r.url), link = Q.safeLink(r.url);
+      var thumb = Q.safeLink(r.image_url) || (info ? info.thumb : "");
+      var inner = (thumb ? '<img class="r-img" src="' + esc(thumb) + '" alt="" loading="lazy">' : "")
+        + '<span class="play">' + icon("play") + "</span><h3>" + esc(r.title) + "</h3><p>" + esc(r.subtitle) + "</p>";
+      var cls = "reel g" + (i % 4) + (thumb ? " has-img" : "");
+      if (info) return '<div class="' + cls + '" role="button" tabindex="0" data-kind="' + info.type + '" data-embed="' + esc(info.embed) + '">' + inner + "</div>";
+      if (link) return '<a class="' + cls + '" href="' + esc(link) + '" target="_blank" rel="noopener">' + inner + "</a>";
       return "";
     }).join("");
     $("reel-grid").innerHTML = html;

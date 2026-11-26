@@ -32,11 +32,12 @@
     },
     reels: {
       label: "Videos / Reels", one: "Video", table: "reels", fixed: {}, cols: ["title", "url", "is_active"],
-      hint: "Instagram reel ya YouTube video ka link paste karein. Website par click karte hi video wahin popup mein chalegi. Channel ya profile ka link ho to naya tab khulega.",
+      hint: "Instagram reel ya YouTube video ka link paste karein. Website par card par thumbnail dikhti hai aur click karte hi video usi box mein chalti hai. Channel ya profile ka link ho to naya tab khulega.",
       fields: [
         ["title", "Title", "text", 100, true],
         ["subtitle", "Chhoti line (jaise Faculty Reel)", "text", 100],
         ["url", "Instagram reel ya YouTube video ka link", "text", 300, true],
+        ["image_url", "Thumbnail photo", "image", "YouTube ki thumbnail apne aap aa jati hai, yahan photo lagane ki zaroorat nahi. Instagram reel ke liye yahan photo lagayein (khadi photo, 720 × 1280 sabse achhi), warna card par sirf rang dikhega. JPG, PNG ya WebP.", false, "tall"],
         ["sort", "Order (chhota number pehle)", "number"],
         ["is_active", "Website par dikhayein", "check"]
       ]
@@ -215,11 +216,11 @@
     if (type === "image") {
       var url = Q.safeLink(val);
       return '<div class="full imgf"><span class="lbl">' + label + '</span><div class="imgrow">'
-        + '<div class="thumb" id="e-' + k + '-box">' + (url ? '<img src="' + esc(url) + '" alt="">' : "<span>Photo nahi hai</span>") + "</div>"
+        + '<div class="thumb' + (f[5] === "tall" ? " tall" : "") + '" id="e-' + k + '-box">' + (url ? '<img src="' + esc(url) + '" alt="">' : "<span>Photo nahi hai</span>") + "</div>"
         + '<div class="imgctl"><input type="file" id="e-' + k + '-file" accept="image/png,image/jpeg,image/webp" aria-label="' + label + '">'
         + '<input type="hidden" id="e-' + k + '" value="' + esc(url) + '">'
         + '<button class="link del" type="button" data-clear-img="' + k + '"' + (url ? "" : " hidden") + ">Photo hatayein</button>"
-        + "<small>Sabse achha size 1200 × 400 (chaudi patti). Card ka size nahi badlega: photo usi jagah mein fit hogi aur zaroorat ho to upar-neeche se thodi kategi, isliye zaroori cheez beech mein rakhein. JPG, PNG ya WebP.</small></div></div></div>";
+        + "<small>" + esc(f[3] || "Sabse achha size 1200 × 400 (chaudi patti). Card ka size nahi badlega: photo usi jagah mein fit hogi aur zaroorat ho to upar-neeche se thodi kategi, isliye zaroori cheez beech mein rakhein. JPG, PNG ya WebP.") + "</small></div></div></div>";
     }
     if (type === "textarea") return '<label class="full">' + label + '<textarea id="e-' + k + '" rows="3" maxlength="' + f[3] + '">' + esc(val) + "</textarea></label>";
     if (type === "number") return "<label>" + label + '<input id="e-' + k + '" inputmode="numeric" value="' + (Number(val) ? Number(val) : "") + '"></label>';

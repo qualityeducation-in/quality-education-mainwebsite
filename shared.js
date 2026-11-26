@@ -130,3 +130,15 @@
   Q.TEXT = {};
   Q.TEXTS.forEach(function (g) { g[1].forEach(function (f) { Q.TEXT[f[0]] = f[2]; }); });
 })();
+
+// ---------- Video ke link se jaankari: kahan ki hai, embed link, thumbnail ----------
+(function () {
+  var Q = window.QE;
+  Q.videoInfo = function (url) {
+    url = String(url || "").trim();
+    var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/))([\w-]{11})/i);
+    if (m) return { type: "yt", embed: "https://www.youtube.com/embed/" + m[1], thumb: "https://i.ytimg.com/vi/" + m[1] + "/hqdefault.jpg" };
+    var embed = Q.embedUrl(url);
+    return embed ? { type: "ig", embed: embed, thumb: "" } : null;
+  };
+})();

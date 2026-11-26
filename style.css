@@ -359,3 +359,24 @@ nav>a,.connect>button{padding:8px 9px;font-size:.92rem}
 .c-img.has-img::after{display:none}
 .c-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .hero h1 b{font-weight:inherit}
+
+/* ---------- reels: thumbnail + usi box mein video ---------- */
+.reels{display:flex;flex-wrap:wrap;justify-content:center;gap:20px}
+.reel{flex:0 0 250px;aspect-ratio:9/16;color:#fff;text-decoration:none}
+.reel .r-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reel.has-img::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(6,13,43,.05) 40%,rgba(6,13,43,.88))}
+.reel .play,.reel h3,.reel p{z-index:1}
+.reel h3,.reel p{position:relative}
+.reel .play{background:rgba(6,13,43,.45);transition:transform .2s}
+.reel:hover .play{transform:scale(1.1)}
+.reel.playing{padding:0;background:#000;cursor:default}
+.reel.playing:hover{transform:none}
+.reel.playing::after{display:none}
+.reel.playing iframe{position:absolute;left:0;top:0;width:100%;height:100%;border:0;background:#000}
+.r-close{position:absolute;top:8px;right:8px;z-index:3;width:32px;height:32px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#0F1B3D;font-weight:700;font-size:.9rem;box-shadow:0 4px 10px rgba(0,0,0,.4)}
+@media (max-width:640px){
+  .reels{flex-wrap:nowrap;justify-content:flex-start;gap:14px}
+  .reels>.reel{flex:0 0 64%;max-width:250px;scroll-snap-align:center;padding:14px;border-radius:18px}
+  .reels>.reel.playing{padding:0}
+  .reels>.reel:only-child{margin:0 auto}
+}
