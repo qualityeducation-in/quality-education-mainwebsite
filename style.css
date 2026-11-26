@@ -32,7 +32,7 @@ svg.i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:2;st
 .notice{background:linear-gradient(90deg,var(--saffron),var(--rose));color:#fff;font-weight:600;font-size:.92rem;padding:8px 20px;display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;text-align:center}
 .notice a{background:#fff;color:var(--rose);border:0;border-radius:999px;padding:3px 14px;font-weight:700;font-size:.85rem}
 header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.navbar{display:flex;align-items:center;gap:18px;padding:10px 0}
+.navbar{display:flex;align-items:center;gap:18px;padding:10px 20px}
 .brand{display:flex;align-items:center;gap:12px;background:none;border:0;padding:0;text-align:left}
 .brand-mark{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--navy),var(--sky));color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1rem;letter-spacing:.02em}
 .brand-mark b{color:var(--saffron-2)}
@@ -53,7 +53,7 @@ nav>a:hover,.connect>button:hover{background:var(--bg);color:var(--ink)}
 .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;pointer-events:none}
 .orb.o1{width:340px;height:340px;background:var(--saffron);left:-120px;bottom:-140px}
 .orb.o2{width:300px;height:300px;background:var(--sky);right:10%;top:-120px}
-.hero-in{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:64px 0 72px}
+.hero-in{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:64px 20px 72px}
 .hero .pill{background:rgba(255,255,255,.1);color:#FFD9A0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
 .hero h1{font-size:clamp(2rem,4.6vw,3.35rem);font-weight:800;margin:18px 0 16px}
 .hero h1 span{background:linear-gradient(90deg,var(--saffron-2),var(--saffron));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -232,3 +232,124 @@ dialog#vid.tall iframe{aspect-ratio:9/16;max-height:82vh}
 dialog#vid button{position:absolute;right:8px;top:8px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.9);font-weight:700;z-index:2}
 .load-note{grid-column:1/-1;text-align:center;color:var(--muted);padding:26px;border:1.5px dashed var(--line);border-radius:18px}
 .dark .load-note{color:#C0CBEE;border-color:rgba(255,255,255,.2)}
+
+/* ---------- call + enquiry bar (phone only) ---------- */
+.mbar{display:none}
+
+/* ---------- phone layout ---------- */
+@media (max-width:640px){
+  body{font-size:16px;overflow-x:clip;padding-bottom:68px}
+  .wrap{padding:0 16px}
+  .notice{font-size:.8rem;padding:6px 12px;gap:8px}
+  .navbar{padding:8px 16px;gap:10px}
+  .brand-mark{width:38px;height:38px;border-radius:11px;font-size:.9rem}
+  .brand strong{font-size:1rem}
+  .brand small{font-size:.72rem}
+  nav{padding:8px 16px 14px}
+
+  .hero-in{padding:30px 16px 34px;gap:26px}
+  .hero .pill{font-size:.8rem;padding:5px 12px}
+  .hero h1{font-size:1.75rem;margin:14px 0 12px}
+  .hero p.lead{font-size:.98rem}
+  .actions{margin:20px 0 22px;gap:10px}
+  .actions .btn{flex:1 1 0;padding:12px 10px;font-size:.86rem;white-space:nowrap}
+  .trust{grid-template-columns:repeat(4,1fr);gap:8px;max-width:none}
+  .trust div{padding:10px 4px;border-radius:12px}
+  .trust b{font-size:1.02rem}
+  .trust small{font-size:.66rem;line-height:1.25;display:block}
+  .stage{min-height:0}
+  .phone{width:232px;border-radius:32px;padding:10px}
+  .phone-in{border-radius:24px;padding:12px;gap:8px}
+  .p-banner{padding:13px;border-radius:15px}
+  .p-row{padding:8px 10px;font-size:.84rem}
+  .p-row i{width:30px;height:30px}
+  .float{display:none}
+  .strip div{padding:10px 0;gap:10px}
+  .strip span{font-size:.8rem;padding:5px 14px}
+
+  section.sec{padding:40px 0}
+  .title{margin-bottom:20px}
+  .title p{font-size:.72rem;margin-bottom:6px}
+  .title h2{font-size:1.45rem}
+
+  /* cards slide sideways instead of stacking into a very long page */
+  .grid3,.reels,.apps{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;margin:0 -16px;padding:6px 16px 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .grid3::-webkit-scrollbar,.reels::-webkit-scrollbar,.apps::-webkit-scrollbar,.chips::-webkit-scrollbar{display:none}
+  .grid3>.course,.apps>.app{flex:0 0 80%;max-width:310px;scroll-snap-align:center}
+  .grid3>.course:only-child{flex-basis:100%;max-width:none}
+  .grid3>.load-note{flex:1}
+  .course:hover,.reel:hover{transform:none}
+  .c-img{height:92px;font-size:1.9rem}
+  .c-body{padding:16px;gap:8px}
+  .c-body h3{font-size:1.05rem}
+  .c-body p{font-size:.9rem}
+  .c-foot{flex-wrap:wrap}
+  .chips{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;margin:0 -16px 16px;padding:0 16px;scrollbar-width:none}
+  .chip{flex:none}
+
+  .feat{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+  .feat div{padding:14px}
+  .feat i{width:38px;height:38px;border-radius:11px;margin-bottom:10px;font-size:1rem}
+  .feat h3{font-size:.92rem}
+  .feat p{font-size:.82rem;line-height:1.4}
+
+  .book{padding:22px 18px;border-radius:22px;gap:22px}
+  .book h2{font-size:1.35rem;margin:12px 0 8px}
+  .book p{font-size:.94rem}
+  .checks{grid-template-columns:1fr 1fr;gap:8px;margin:16px 0 18px}
+  .checks span{font-size:.84rem;gap:6px}
+  .cover{width:160px;padding:16px}
+  .cover h3{font-size:1.6rem}
+  #book-list-title{margin-top:36px!important}
+
+  .reels>.reel{flex:0 0 46%;max-width:190px;scroll-snap-align:center;padding:14px;border-radius:18px}
+  .reel .play{width:50px;height:50px}
+  .reel h3{font-size:.98rem}
+  .reel p{font-size:.8rem}
+
+  .res{gap:14px}
+  .res-main{padding:22px;border-radius:18px}
+  .res-main h3{font-size:1.25rem}
+  .res-list{gap:10px}
+  .res-list a{padding:12px 14px;font-size:.95rem}
+  .res-list i{width:38px;height:38px}
+
+  .results{gap:14px}
+  .r-main{padding:20px;border-radius:18px}
+  .r-main h3{font-size:1.15rem;margin:10px 0 14px}
+  .r-stats{gap:10px}
+  .r-stats div{padding:12px}
+  .r-stats b{font-size:1.3rem}
+  .r-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .stu{padding:14px;border-radius:14px}
+  .ava{width:38px;height:38px;margin-bottom:8px}
+  .stu h4{font-size:.92rem}
+  .stu p{font-size:.8rem;line-height:1.35}
+
+  .app{padding:20px;border-radius:18px}
+  .help{flex-direction:column;gap:4px;padding:14px;font-size:.9rem;text-align:center;margin-top:8px}
+
+  .c-grid{gap:24px}
+  .contact h2{font-size:1.55rem}
+  .c-boxes div{padding:12px 14px}
+  .c-boxes i{width:40px;height:40px}
+  form.enq{padding:20px;border-radius:18px}
+  input,select,textarea{font-size:16px} /* 16px se chhota ho to iPhone zoom kar deta hai */
+  footer{padding:22px 0;font-size:.85rem}
+  footer .wrap{flex-direction:column;text-align:center;gap:8px}
+
+  .mbar{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);box-shadow:0 -10px 24px -18px rgba(10,22,64,.5)}
+  .mbar .btn{padding:12px 10px;font-size:.9rem}
+  dialog#vid{width:94vw}
+}
+@media (max-width:360px){
+  .hero h1{font-size:1.55rem}
+  .actions .btn{font-size:.8rem}
+  .trust small{font-size:.6rem}
+}
+
+/* small fixes */
+nav>a,.connect>button,.hdr-cta,.brand small{white-space:nowrap}
+nav>a,.connect>button{padding:8px 9px;font-size:.92rem}
+@media (max-width:1180px) and (min-width:961px){.brand small{display:none}.navbar{gap:10px}}
+@media (max-width:640px){.phone{width:250px}.p-row{white-space:nowrap;font-size:.82rem}}

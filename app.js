@@ -136,7 +136,7 @@
 
     if (get("phone")) {
       document.querySelectorAll("[data-phone]").forEach(function (el) { el.textContent = get("phone"); });
-      $("tel-link").href = "tel:+91" + get("phone").replace(/\D/g, "");
+      document.querySelectorAll("[data-tel]").forEach(function (el) { el.href = "tel:+91" + get("phone").replace(/\D/g, "").slice(-10); });
     }
     if (get("email")) {
       document.querySelectorAll("[data-email]").forEach(function (el) { el.textContent = get("email"); });
