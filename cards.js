@@ -73,6 +73,37 @@
     return "";
   };
 
+  Q.fmtDate = function (iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? "" : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  // Blog post ka card (home page ki line aur blog page dono mein).
+  Q.postCard = function (p) {
+    var photo = Q.safeLink(p.image_url);
+    return '<a class="course post" href="blog.html?id=' + encodeURIComponent(p.id) + '">'
+      + (photo ? '<div class="c-img has-img"><img src="' + esc(photo) + '" alt="" loading="lazy"></div>' : '<div class="c-img g2">' + esc(T("blog_title")) + "</div>")
+      + '<div class="c-body"><span class="c-date">' + esc(Q.fmtDate(p.created_at)) + "</span><h3>" + esc(p.title) + "</h3><p>" + esc(p.summary) + "</p>"
+      + '<div class="c-foot"><span class="read">' + esc(T("blog_read")) + " " + icon("arrow") + "</span></div></div></a>";
+  };
+
+  // Blog ka likha hua text ko surakshit HTML mein badalta hai. Chalne wali cheezein:
+  // khaali line = naya paragraph, "## " = heading, "- " = bullet, **mota**, aur link apne aap.
+  Q.richText = function (text) {
+    var inline = function (s) {
+      return esc(s)
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)])/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    };
+    return String(text || "").replace(/\r/g, "").split(/\n\s*\n/).map(function (block) {
+      var lines = block.split("\n").filter(function (l) { return l.trim() !== ""; });
+      if (!lines.length) return "";
+      if (/^#{1,3}\s+/.test(lines[0]) && lines.length === 1) return "<h2>" + inline(lines[0].replace(/^#{1,3}\s+/, "")) + "</h2>";
+      if (lines.every(function (l) { return /^\s*[-•]\s+/.test(l); })) return "<ul>" + lines.map(function (l) { return "<li>" + inline(l.replace(/^\s*[-•]\s+/, "")) + "</li>"; }).join("") + "</ul>";
+      return "<p>" + lines.map(inline).join("<br>") + "</p>";
+    }).join("");
+  };
+
   // Line ke aakhir mein "View All" wala card.
   Q.moreHtml = function (type, cls) {
     return '<a class="more-card ' + (cls || "") + '" href="all.html?type=' + type + '"><span>' + icon("arrow") + "</span>" + esc(T("view_all")) + "</a>";

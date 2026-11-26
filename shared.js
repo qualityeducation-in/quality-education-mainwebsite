@@ -62,7 +62,7 @@
       ["brand_tag", "Naam ke neeche ki line", "Rajasthan Govt. Exam Preparation"],
       ["notice_btn", "Notice patti ka button", "Order Now"],
       ["nav_courses", "Menu: Courses", "Courses"], ["nav_tests", "Menu: Tests", "Tests"], ["nav_books", "Menu: Books", "Books"],
-      ["nav_faculty", "Menu: Faculty", "Faculty"], ["nav_resources", "Menu: Resources", "Resources"],
+      ["nav_faculty", "Menu: Faculty", "Faculty"], ["nav_resources", "Menu: Resources", "Resources"], ["nav_blog", "Menu: Blog", "Blog"],
       ["nav_app", "Menu: Download App", "Download App"], ["nav_contact", "Menu: Contact", "Contact"],
       ["nav_connect", "Menu: Connect With Us", "Connect With Us"],
       ["cta", "Enquiry ka button (upar aur mobile par)", "Enquire Now"],
@@ -107,7 +107,13 @@
       ["res_main_d", "Bade box ki line", "Exam-oriented current affairs with short notes and PDF download."],
       ["res_btn", "Bade box ka button", "Get PDF"],
       ["res1", "List 1", "Syllabus PDFs"], ["res2", "List 2", "Previous Year Papers"],
-      ["res3", "List 3", "Vacancy Updates"], ["res4", "List 4", "Preparation Strategy"]]],
+      ["res3", "List 3", "Vacancy Updates"], ["res4", "List 4", "Preparation Strategy"],
+      ["res_view", "PDF page: dekhne ka button", "View"], ["res_download", "PDF page: download ka button", "Download"],
+      ["res_empty", "PDF page: jab koi PDF na ho", "Is section mein abhi koi PDF nahi hai. Jald hi jodi jayegi."]]],
+    ["Blog", [
+      ["blog_eyebrow", "Chhoti heading", "Latest Articles"], ["blog_title", "Badi heading", "Blog"],
+      ["blog_read", "Post padhne ka button", "Read More"], ["blog_back", "Post se wapas jaane ka link", "All Posts"],
+      ["blog_empty", "Jab koi post na ho", "Abhi koi post nahi hai. Jald hi yahan naye lekh aayenge."]]],
     ["Results section", [
       ["results_eyebrow", "Chhoti heading", "Results & Feedback"], ["results_title", "Badi heading", "Selected Students & Success Stories"],
       ["results_badge", "Box ka tag", "Our Results"], ["results_box_title", "Box ki heading", "Rajasthan Govt. Exam Selections"]]],
@@ -142,4 +148,11 @@
     var embed = Q.embedUrl(url);
     return embed ? { type: "ig", embed: embed, thumb: "" } : null;
   };
+})();
+
+// ---------- PDF ke section (Resources). Naam Website Text se aate hain. ----------
+(function () {
+  var Q = window.QE;
+  // [link mein aane wala naam, Website Text ki key jisse section ka naam aata hai]
+  Q.DOC_CATS = [["current", "res_main_t"], ["syllabus", "res1"], ["papers", "res2"], ["vacancy", "res3"], ["strategy", "res4"]];
 })();

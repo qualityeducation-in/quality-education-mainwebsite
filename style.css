@@ -433,3 +433,42 @@ nav>a,.connect>button{padding:8px 9px;font-size:.92rem}
   .reels.wrap-all{gap:12px}
   .reels.wrap-all>.reel{flex:0 0 calc(50% - 6px);max-width:none}
 }
+
+/* ---------- PDF page (Resources) ---------- */
+.wrap.narrow{max-width:860px}
+.chip[aria-current="page"]{background:var(--navy);color:#fff;box-shadow:none}
+a.chip{text-decoration:none;color:inherit}
+.doc-list{display:grid;gap:14px}
+.doc{display:flex;align-items:center;gap:16px;background:var(--card);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+.doc>i{flex:none;width:48px;height:48px;border-radius:13px;background:#FDE7EC;color:var(--rose);display:grid;place-items:center;font-size:1.15rem}
+.doc-t{flex:1;min-width:0}
+.doc-t h3{font-size:1.02rem;overflow-wrap:anywhere}
+.doc-t p{color:var(--muted);font-size:.92rem}
+.doc-t small{color:var(--muted);font-size:.8rem}
+.doc-b{display:flex;gap:8px;flex:none}
+
+/* ---------- Blog ---------- */
+a.course.post{color:inherit;text-decoration:none}
+.c-date{color:var(--muted);font-size:.8rem;font-weight:600}
+.post .read{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-weight:700;font-size:.9rem;color:var(--saffron)}
+.post .c-foot{justify-content:flex-start}
+.post .c-img:not(.has-img){font-size:1.6rem}
+.post-page h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;margin:6px 0 20px}
+.post-page #post-img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:18px;margin-bottom:24px;display:block}
+.back-link{display:inline-block;margin-bottom:18px;font-weight:700;color:var(--saffron)}
+.prose{font-size:1.08rem;line-height:1.75;overflow-wrap:anywhere}
+.prose p{margin:0 0 1.1em}
+.prose h2{font-size:1.35rem;margin:1.6em 0 .6em}
+.prose ul{margin:0 0 1.1em;padding-left:1.3em}
+.prose li{margin-bottom:.4em}
+.prose a{color:var(--sky);text-decoration:underline}
+nav>a,.connect>button{padding:8px 8px;font-size:.9rem}
+
+@media (max-width:640px){
+  .doc{flex-wrap:wrap;gap:12px;padding:14px}
+  .doc-t{flex:1 1 60%}
+  .doc-b{flex:1 1 100%}
+  .doc-b .btn{flex:1}
+  .chips#res-tabs{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;margin:0 -16px 16px;padding:0 16px;scrollbar-width:none}
+  .prose{font-size:1rem}
+}

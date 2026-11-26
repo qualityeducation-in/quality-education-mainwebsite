@@ -42,6 +42,28 @@
         ["is_active", "Website par dikhayein", "check"]
       ]
     },
+    docs: {
+      label: "PDFs", one: "PDF", table: "docs", fixed: {}, order: "created_at", cols: ["title", "category", "file_url", "is_active"],
+      hint: "Yahan jodi gayi har PDF website ke Resources wale page par us section mein dikhti hai jo aap chunte hain, View aur Download button ke saath. Nayi PDF sabse upar aati hai.",
+      fields: [
+        ["title", "PDF ka naam (jaise 25 November 2026 Current Affairs)", "text", 150, true],
+        ["category", "Kis section mein dikhe", "select", Q.DOC_CATS.map(function (c) { return [c[0], Q.TEXT[c[1]]]; })],
+        ["descr", "Chhoti jaankari (optional)", "text", 200],
+        ["file_url", "PDF file", "pdf", "Computer se PDF chunein (20 MB tak). Ya agar PDF Google Drive jaisi jagah par hai to uska link upar ke box mein paste kar dein.", true],
+        ["is_active", "Website par dikhayein", "check"]
+      ]
+    },
+    posts: {
+      label: "Blog", one: "Blog Post", table: "posts", fixed: {}, order: "created_at", cols: ["title", "created_at", "is_active"],
+      hint: "Har post website ke Blog page par dikhti hai, aur sabse nayi posts home page par bhi. Nayi post sabse upar aati hai.",
+      fields: [
+        ["title", "Post ka title", "text", 150, true],
+        ["summary", "Chhota saar (card par dikhta hai, 1-2 line)", "textarea", 300],
+        ["image_url", "Post ki photo (optional)", "image", "Sabse achha size 1280 × 720 (16:9). JPG, PNG ya WebP."],
+        ["body", "Poora lekh", "longtext", 30000, true],
+        ["is_active", "Website par dikhayein", "check"]
+      ]
+    },
     results: {
       label: "Results", one: "Selected Student", table: "results", fixed: {}, cols: ["name", "detail"],
       fields: [
@@ -67,7 +89,7 @@
       ["instagram", "Instagram"], ["youtube", "YouTube"], ["telegram", "Telegram"], ["whatsapp_channel", "WhatsApp Channel"],
       ["facebook", "Facebook"], ["twitter", "Twitter / X"], ["linkedin", "LinkedIn"]]]
   ];
-  var COL_LABEL = { is_active: "Status", video_url: "Demo video", url: "Link", price: "Fee" };
+  var COL_LABEL = { is_active: "Status", video_url: "Demo video", url: "Link", price: "Fee", category: "Section", file_url: "File", created_at: "Date" };
 
   var S = { tab: "enquiries", edit: null, rows: [], enq: [], fq: "", fs: "" };
   var view = $("view");
@@ -199,7 +221,8 @@
   function loadEntity() {
     var E = ENT[S.tab], qy = sb.from(E.table).select("*");
     Object.keys(E.fixed).forEach(function (k) { qy = qy.eq(k, E.fixed[k]); });
-    qy.order("sort").order("id").then(function (r) {
+    qy = E.order ? qy.order(E.order, { ascending: false }) : qy.order("sort").order("id");
+    qy.then(function (r) {
       if (r.error) return fail(r.error);
       S.rows = r.data || []; drawEntity();
     });
@@ -209,9 +232,10 @@
     var val = cur ? cur[k] : (k === "is_active" ? true : "");
     if (type === "check") return '<label class="check"><input type="checkbox" id="e-' + k + '"' + (val ? " checked" : "") + "> " + label + "</label>";
     if (type === "select") {
-      var opts = f[3].slice();
-      if (val && opts.indexOf(val) < 0) opts.unshift(val); // purana exam jo ab list mein nahi hai
-      return "<label>" + label + '<select id="e-' + k + '">' + opts.map(function (o) { return "<option" + (o === val ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("") + "</select></label>";
+      // Option ya to seedha naam hota hai, ya [value, dikhne wala naam].
+      var opts = f[3].map(function (o) { return Array.isArray(o) ? o : [o, o]; });
+      if (val && !opts.some(function (o) { return o[0] === val; })) opts.unshift([val, val]); // purana exam jo ab list mein nahi hai
+      return "<label>" + label + '<select id="e-' + k + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === val ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select></label>";
     }
     if (type === "image") {
       var url = Q.safeLink(val);
@@ -221,6 +245,17 @@
         + '<input type="hidden" id="e-' + k + '" value="' + esc(url) + '">'
         + '<button class="link del" type="button" data-clear-img="' + k + '"' + (url ? "" : " hidden") + ">Photo hatayein</button>"
         + "<small>" + esc(f[3] || "Sabse achha size 1280 × 720 (YouTube thumbnail jaisa, 16:9). Is naap ki photo card par poori dikhti hai, kuch nahi katta. JPG, PNG ya WebP.") + "</small></div></div></div>";
+    }
+    if (type === "pdf") {
+      return '<div class="full imgf"><span class="lbl">' + label + '</span><div class="imgctl">'
+        + '<input id="e-' + k + '" maxlength="500" placeholder="PDF ka link (file chunne par apne aap bhar jayega)" value="' + esc(val) + '">'
+        + '<input type="file" id="e-' + k + '-file" accept="application/pdf,.pdf" aria-label="' + label + '">'
+        + (val ? '<a href="' + esc(Q.safeLink(val)) + '" target="_blank" rel="noopener">Abhi lagi hui PDF dekhein ↗</a>' : "")
+        + "<small>" + esc(f[3]) + "</small></div></div>";
+    }
+    if (type === "longtext") {
+      return '<label class="full">' + label + '<textarea id="e-' + k + '" rows="16" maxlength="' + f[3] + '">' + esc(val) + "</textarea>"
+        + '<small class="help">Likhne ka tareeka: naya paragraph ke liye ek line khaali chhodein. Heading ke liye line ke shuru mein "## " lagayein. Bullet ke liye har line "- " se shuru karein. Mota likhne ke liye **shabd**. Link seedha paste karein, wo apne aap click hone wala ban jata hai.</small></label>';
     }
     if (type === "textarea") return '<label class="full">' + label + '<textarea id="e-' + k + '" rows="3" maxlength="' + f[3] + '">' + esc(val) + "</textarea></label>";
     if (type === "number") return "<label>" + label + '<input id="e-' + k + '" inputmode="numeric" value="' + (Number(val) ? Number(val) : "") + '"></label>';
@@ -233,6 +268,12 @@
       if (!r[c]) return "—";
       var short = r[c].length > 42 ? r[c].slice(0, 41) + "…" : r[c];
       return (Q.embedUrl(r[c]) ? "Video ✓" : "Link") + " <small>" + esc(short) + "</small>";
+    }
+    if (c === "file_url") return r[c] ? '<a href="' + esc(Q.safeLink(r[c])) + '" target="_blank" rel="noopener">PDF kholein ↗</a>' : "—";
+    if (c === "created_at") return esc(fmtDate(r[c]).split(",")[0]);
+    if (c === "category") {
+      var cat = Q.DOC_CATS.filter(function (x) { return x[0] === r[c]; })[0];
+      return esc(cat ? Q.TEXT[cat[1]] : r[c]);
     }
     return c === E.fields[0][0] ? "<b>" + esc(r[c]) + "</b>" : esc(r[c]);
   }
@@ -258,21 +299,28 @@
       + "</tbody></table></div>";
   }
   function saveEntity() {
-    var E = ENT[S.tab], data = {}, missing = null, uploads = [];
+    var E = ENT[S.tab], data = {}, missing = null, uploads = [], badLink = false;
     Object.keys(E.fixed).forEach(function (k) { data[k] = E.fixed[k]; });
     E.fields.forEach(function (f) {
       var el = $("e-" + f[0]);
       if (f[2] === "check") data[f[0]] = el.checked;
       else if (f[2] === "number") data[f[0]] = Math.min(Number(el.value.replace(/\D/g, "")) || 0, 100000000);
-      else if (f[2] === "image") { data[f[0]] = el.value; var picked = $("e-" + f[0] + "-file").files[0]; if (picked) uploads.push([f[0], picked]); }
+      else if (f[2] === "image" || f[2] === "pdf") {
+        data[f[0]] = el.value.trim();
+        var picked = $("e-" + f[0] + "-file").files[0];
+        if (picked) { uploads.push([f[0], picked, f[2]]); data[f[0]] = "uploading"; } // asli link upload ke baad bharta hai
+        else if (f[2] === "pdf" && data[f[0]] && !Q.safeLink(data[f[0]])) { badLink = true; }
+      }
       else data[f[0]] = el.value.trim();
       if (f[4] && !data[f[0]] && !missing) missing = f;
     });
     if (missing) { flash(missing[1] + " bharna zaroori hai.", true); $("e-" + missing[0]).focus(); return; }
+    if (badLink) { flash("PDF ka link https:// se shuru hona chahiye, ya computer se file chunein.", true); return; }
     var btn = $("e-save");
-    btn.disabled = true; btn.textContent = uploads.length ? "Photo upload ho rahi hai…" : "Save ho raha hai…";
+    btn.disabled = true; btn.textContent = uploads.length ? "File upload ho rahi hai…" : "Save ho raha hai…";
     var done = function () { btn.disabled = false; btn.textContent = "Save"; };
     Promise.all(uploads.map(function (u) {
+      if (u[2] === "pdf") return uploadPdf(u[1], data.category || "pdf").then(function (url) { data[u[0]] = url; data.file_size = u[1].size; });
       return uploadImage(u[1], E.fixed.kind || E.table).then(function (url) { data[u[0]] = url; });
     })).then(function () {
       return S.edit === "new" ? sb.from(E.table).insert(data) : sb.from(E.table).update(data).eq("id", S.edit);
@@ -299,6 +347,16 @@
       };
       img.onerror = function () { URL.revokeObjectURL(src); resolve(file); };
       img.src = src;
+    });
+  }
+  function uploadPdf(file, folder) {
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) return Promise.reject({ message: "Sirf PDF file chalegi." });
+    if (file.size > 20 * 1024 * 1024) return Promise.reject({ message: "PDF 20 MB se chhoti honi chahiye. Badi file ho to use Google Drive par daal kar uska link lagayein." });
+    var clean = file.name.replace(/\.pdf$/i, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "file";
+    var path = folder + "/" + Date.now() + "-" + clean + ".pdf";
+    return sb.storage.from("docs").upload(path, file, { contentType: "application/pdf", cacheControl: "3600" }).then(function (r) {
+      if (r.error) throw { message: "PDF upload nahi ho saki (" + r.error.message + ")" };
+      return sb.storage.from("docs").getPublicUrl(path).data.publicUrl;
     });
   }
   function uploadImage(file, folder) {
@@ -360,7 +418,7 @@
   view.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "fs") { S.fs = t.value; $("enq-body").innerHTML = enqRows(); }
-    if (t.type === "file" && t.files[0]) {
+    if (t.type === "file" && t.files[0] && /^image\//.test(t.files[0].type)) {
       var key = t.id.replace(/^e-|-file$/g, ""), box = $("e-" + key + "-box"), pic = document.createElement("img");
       pic.alt = ""; pic.src = URL.createObjectURL(t.files[0]);
       box.innerHTML = ""; box.appendChild(pic);

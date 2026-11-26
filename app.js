@@ -122,6 +122,12 @@
     updateSliders();
   }
 
+  function renderBlog(posts) {
+    $("blog-grid").innerHTML = posts.map(Q.postCard).join("");
+    $("blog").hidden = !posts.length;
+    updateSliders();
+  }
+
   function renderResults(rows) {
     $("result-grid").innerHTML = rows.map(function (r, i) {
       return '<div class="stu"><div class="ava g' + (i % 4) + '">' + esc(String(r.name).charAt(0).toUpperCase()) + "</div><h4>" + esc(r.name) + "</h4><p>" + esc(r.detail) + "</p></div>";
@@ -202,7 +208,8 @@
       sb.from("items").select("*").eq("is_active", true).order("sort").order("id"),
       sb.from("reels").select("*").eq("is_active", true).order("sort").order("id"),
       sb.from("results").select("*").order("sort").order("id"),
-      sb.from("settings").select("*")
+      sb.from("settings").select("*"),
+      sb.from("posts").select("id,title,summary,image_url,created_at").eq("is_active", true).order("created_at", { ascending: false }).limit(Q.LIMIT)
     ]).then(function (r) {
       if (r[0].error || r[3].error) return failed();
       Q.loadSettings(r[3].data);
@@ -212,6 +219,7 @@
       renderItems();
       renderReels();
       renderResults(r[2].data || []);
+      renderBlog(r[4] && !r[4].error ? r[4].data || [] : []); // posts table na ho to section chhupa rehta hai
       fromOtherPage();
     }).catch(failed);
   }

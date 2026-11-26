@@ -89,3 +89,6 @@ td .mini{width:72px;height:24px;object-fit:cover;border-radius:5px;display:block
 .thumb.tall{width:126px;aspect-ratio:9/16}
 .thumb{aspect-ratio:16/9;width:240px}
 .thumb.tall{width:126px;aspect-ratio:9/16}
+small.help{color:var(--muted);font-weight:400;font-size:.82rem;line-height:1.5}
+.imgf>.imgctl{justify-items:stretch}
+.imgf>.imgctl a{font-weight:600;font-size:.9rem}
