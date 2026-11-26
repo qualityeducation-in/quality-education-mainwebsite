@@ -9,6 +9,7 @@
     ["tag", "Badge (jaise Most Popular)", "text", 40],
     ["meta", 'Highlights, " · " se alag karein (jaise 12 Months · PDF Notes)', "text", 120],
     ["descr", "Description", "textarea", 500],
+    ["image_url", "Thumbnail photo", "image"],
     ["price", 'Fee ₹ (khaali = "enquiry karein")', "number"],
     ["mrp", "MRP ₹ (kati hui keemat, optional)", "number"],
     ["video_url", "Demo video link (YouTube ya Instagram, optional)", "text", 300],
@@ -50,6 +51,8 @@
     }
   };
   var SETTINGS = [
+    ["Exams ki list", [
+      ["exams", "Har line mein ek exam. Yahi list course ke Exam, website ke filter button, upar ki chalti patti aur enquiry form mein aati hai. \"Other\" apne aap aakhir mein judta hai.", true]]],
     ["Notice aur Contact", [
       ["notice_text", "Upar ki notice patti (khaali = patti band)"], ["phone", "Phone / WhatsApp number"],
       ["email", "Support email"], ["address", "Offices"]]],
@@ -95,7 +98,11 @@
         return sb.auth.signOut().then(function () { showLogin("Is account ko admin access nahi diya gaya hai."); });
       }
       $("body").className = ""; $("login").hidden = true; $("app").hidden = false;
-      drawTabs(); render();
+      drawTabs();
+      sb.from("settings").select("*").eq("k", "exams").then(function (x) {
+        if (x.data && x.data[0]) Q.setExams(x.data[0].v);
+        render();
+      });
     });
   }
   $("login").addEventListener("submit", function (e) {
@@ -121,7 +128,7 @@
   function drawTabs() {
     var newCount = S.enq.filter(function (x) { return x.status === "new"; }).length;
     var tabs = [["enquiries", "Enquiries" + (newCount ? " <b>" + newCount + "</b>" : "")]]
-      .concat(Object.keys(ENT).map(function (k) { return [k, ENT[k].label]; }), [["settings", "Settings"]]);
+      .concat(Object.keys(ENT).map(function (k) { return [k, ENT[k].label]; }), [["texts", "Website Text"], ["settings", "Settings"]]);
     $("tabs").innerHTML = tabs.map(function (t) {
       return '<button type="button" data-tab="' + t[0] + '" class="' + (S.tab === t[0] ? "on" : "") + '">' + t[1] + "</button>";
     }).join("");
@@ -135,6 +142,7 @@
     view.innerHTML = '<p class="loading">Load ho raha hai…</p>';
     if (S.tab === "enquiries") loadEnquiries();
     else if (S.tab === "settings") loadSettings();
+    else if (S.tab === "texts") loadTexts();
     else loadEntity();
   }
 
@@ -199,7 +207,20 @@
     var k = f[0], label = esc(f[1]), type = f[2];
     var val = cur ? cur[k] : (k === "is_active" ? true : "");
     if (type === "check") return '<label class="check"><input type="checkbox" id="e-' + k + '"' + (val ? " checked" : "") + "> " + label + "</label>";
-    if (type === "select") return "<label>" + label + '<select id="e-' + k + '">' + f[3].map(function (o) { return "<option" + (o === val ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("") + "</select></label>";
+    if (type === "select") {
+      var opts = f[3].slice();
+      if (val && opts.indexOf(val) < 0) opts.unshift(val); // purana exam jo ab list mein nahi hai
+      return "<label>" + label + '<select id="e-' + k + '">' + opts.map(function (o) { return "<option" + (o === val ? " selected" : "") + ">" + esc(o) + "</option>"; }).join("") + "</select></label>";
+    }
+    if (type === "image") {
+      var url = Q.safeLink(val);
+      return '<div class="full imgf"><span class="lbl">' + label + '</span><div class="imgrow">'
+        + '<div class="thumb" id="e-' + k + '-box">' + (url ? '<img src="' + esc(url) + '" alt="">' : "<span>Photo nahi hai</span>") + "</div>"
+        + '<div class="imgctl"><input type="file" id="e-' + k + '-file" accept="image/png,image/jpeg,image/webp" aria-label="' + label + '">'
+        + '<input type="hidden" id="e-' + k + '" value="' + esc(url) + '">'
+        + '<button class="link del" type="button" data-clear-img="' + k + '"' + (url ? "" : " hidden") + ">Photo hatayein</button>"
+        + "<small>Sabse achha size 1200 × 400 (chaudi patti). Card ka size nahi badlega: photo usi jagah mein fit hogi aur zaroorat ho to upar-neeche se thodi kategi, isliye zaroori cheez beech mein rakhein. JPG, PNG ya WebP.</small></div></div></div>";
+    }
     if (type === "textarea") return '<label class="full">' + label + '<textarea id="e-' + k + '" rows="3" maxlength="' + f[3] + '">' + esc(val) + "</textarea></label>";
     if (type === "number") return "<label>" + label + '<input id="e-' + k + '" inputmode="numeric" value="' + (Number(val) ? Number(val) : "") + '"></label>';
     return '<label class="' + (f[3] > 110 ? "full" : "") + '">' + label + '<input id="e-' + k + '" maxlength="' + f[3] + '" value="' + esc(val) + '"' + (f[4] ? " required" : "") + "></label>";
@@ -224,7 +245,7 @@
     if (S.edit !== null) {
       form = '<form class="panel" id="e-form"><h2>' + (cur ? "Edit: " + esc(cur[E.fields[0][0]]) : "Naya " + esc(E.one)) + '</h2><div class="fields">'
         + E.fields.map(function (f) { return fieldHtml(f, cur); }).join("")
-        + '</div><button class="btn" type="submit">Save</button> <button class="btn line" type="button" id="e-cancel">Cancel</button></form>';
+        + '</div><button class="btn" type="submit" id="e-save">Save</button> <button class="btn line" type="button" id="e-cancel">Cancel</button></form>';
     }
     view.innerHTML = '<div class="head"><h1>' + esc(E.label) + '</h1><button class="btn sm" type="button" id="e-new">+ Naya ' + esc(E.one) + "</button></div>"
       + (E.hint ? '<p class="hint">' + esc(E.hint) + "</p>" : "") + form
@@ -236,20 +257,59 @@
       + "</tbody></table></div>";
   }
   function saveEntity() {
-    var E = ENT[S.tab], data = {}, missing = null;
+    var E = ENT[S.tab], data = {}, missing = null, uploads = [];
     Object.keys(E.fixed).forEach(function (k) { data[k] = E.fixed[k]; });
     E.fields.forEach(function (f) {
       var el = $("e-" + f[0]);
       if (f[2] === "check") data[f[0]] = el.checked;
       else if (f[2] === "number") data[f[0]] = Math.min(Number(el.value.replace(/\D/g, "")) || 0, 100000000);
+      else if (f[2] === "image") { data[f[0]] = el.value; var picked = $("e-" + f[0] + "-file").files[0]; if (picked) uploads.push([f[0], picked]); }
       else data[f[0]] = el.value.trim();
       if (f[4] && !data[f[0]] && !missing) missing = f;
     });
     if (missing) { flash(missing[1] + " bharna zaroori hai.", true); $("e-" + missing[0]).focus(); return; }
-    var qy = S.edit === "new" ? sb.from(E.table).insert(data) : sb.from(E.table).update(data).eq("id", S.edit);
-    qy.then(function (r) {
-      if (r.error) return fail(r.error);
+    var btn = $("e-save");
+    btn.disabled = true; btn.textContent = uploads.length ? "Photo upload ho rahi hai…" : "Save ho raha hai…";
+    var done = function () { btn.disabled = false; btn.textContent = "Save"; };
+    Promise.all(uploads.map(function (u) {
+      return uploadImage(u[1], E.fixed.kind || E.table).then(function (url) { data[u[0]] = url; });
+    })).then(function () {
+      return S.edit === "new" ? sb.from(E.table).insert(data) : sb.from(E.table).update(data).eq("id", S.edit);
+    }).then(function (r) {
+      if (r.error) { done(); return fail(r.error); }
       S.edit = null; flash(E.one + " save ho gaya."); loadEntity();
+    }).catch(function (err) { done(); fail(err); });
+  }
+
+  /* ---------- thumbnail upload (Supabase Storage, bucket "thumbs") ---------- */
+  // Badi photo ko 1200px chaudai tak chhota karke JPG banata hai, taaki website halki rahe.
+  function shrinkImage(file) {
+    return new Promise(function (resolve) {
+      var img = new Image(), src = URL.createObjectURL(file);
+      img.onload = function () {
+        URL.revokeObjectURL(src);
+        var scale = Math.min(1, 1200 / img.naturalWidth);
+        var c = document.createElement("canvas");
+        c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+        var ctx = c.getContext("2d");
+        ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(function (b) { resolve(b || file); }, "image/jpeg", 0.86);
+      };
+      img.onerror = function () { URL.revokeObjectURL(src); resolve(file); };
+      img.src = src;
+    });
+  }
+  function uploadImage(file, folder) {
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return Promise.reject({ message: "Sirf JPG, PNG ya WebP photo chalegi." });
+    if (file.size > 8 * 1024 * 1024) return Promise.reject({ message: "Photo 8 MB se chhoti honi chahiye." });
+    return shrinkImage(file).then(function (blob) {
+      var ext = blob.type === "image/jpeg" ? "jpg" : (blob.type === "image/png" ? "png" : "webp");
+      var path = folder + "/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
+      return sb.storage.from("thumbs").upload(path, blob, { contentType: blob.type, cacheControl: "31536000" }).then(function (r) {
+        if (r.error) throw { message: "Photo upload nahi ho saki (" + r.error.message + ")" };
+        return sb.storage.from("thumbs").getPublicUrl(path).data.publicUrl;
+      });
     });
   }
 
@@ -259,6 +319,7 @@
       if (r.error) return fail(r.error);
       var s = {};
       (r.data || []).forEach(function (row) { s[row.k] = row.v; });
+      if (!(s.exams || "").trim()) s.exams = Q.EXAMS.filter(function (x) { return x !== "Other"; }).join("\n");
       view.innerHTML = '<h1>Settings</h1><form class="panel" id="s-form">' + SETTINGS.map(function (g) {
         return "<h2>" + esc(g[0]) + '</h2><div class="fields">' + g[1].map(function (f) {
           return f[2] ? '<label class="full">' + esc(f[1]) + '<textarea id="s-' + f[0] + '" rows="4">' + esc(s[f[0]]) + "</textarea></label>"
@@ -272,6 +333,25 @@
     });
   }
 
+  /* ---------- website text ---------- */
+  function loadTexts() {
+    sb.from("settings").select("*").then(function (r) {
+      if (r.error) return fail(r.error);
+      var s = {};
+      (r.data || []).forEach(function (row) { s[row.k] = row.v; });
+      view.innerHTML = '<div class="head"><h1>Website Text</h1></div>'
+        + '<p class="hint">Website par jo bhi likha hai wo yahan se badlein. Kisi box ko khaali chhod kar save karne par uska purana (default) text wapas aa jata hai. Courses, books, results aur phone number apne apne tab se badalte hain.</p>'
+        + '<form id="t-form">' + Q.TEXTS.map(function (g) {
+          return '<div class="panel"><h2>' + esc(g[0]) + '</h2><div class="fields">' + g[1].map(function (f) {
+            var val = (s["t_" + f[0]] || "").trim() || f[2], long = f[3] || f[2].length > 60;
+            return '<label class="' + (long ? "full" : "") + '">' + esc(f[1]) + (long
+              ? '<textarea id="t-' + f[0] + '" rows="2" maxlength="400">' + esc(val) + "</textarea>"
+              : '<input id="t-' + f[0] + '" maxlength="120" value="' + esc(val) + '">') + "</label>";
+          }).join("") + "</div></div>";
+        }).join("") + '<div class="savebar"><button class="btn" type="submit">Saara Text Save Karein</button></div></form>';
+    });
+  }
+
   /* ---------- events inside the view ---------- */
   view.addEventListener("input", function (e) {
     if (e.target.id === "fq") { S.fq = e.target.value.trim(); $("enq-body").innerHTML = enqRows(); }
@@ -279,6 +359,12 @@
   view.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "fs") { S.fs = t.value; $("enq-body").innerHTML = enqRows(); }
+    if (t.type === "file" && t.files[0]) {
+      var key = t.id.replace(/^e-|-file$/g, ""), box = $("e-" + key + "-box"), pic = document.createElement("img");
+      pic.alt = ""; pic.src = URL.createObjectURL(t.files[0]);
+      box.innerHTML = ""; box.appendChild(pic);
+      view.querySelector('[data-clear-img="' + key + '"]').hidden = false;
+    }
     if (t.dataset.status) {
       sb.from("enquiries").update({ status: t.value }).eq("id", Number(t.dataset.status)).then(function (r) {
         if (r.error) return fail(r.error);
@@ -289,6 +375,12 @@
   view.addEventListener("click", function (e) {
     var t = e.target.closest("button"); if (!t) return;
     if (t.id === "csv") return downloadCsv();
+    if (t.dataset.clearImg) {
+      var ck = t.dataset.clearImg;
+      $("e-" + ck).value = ""; $("e-" + ck + "-file").value = ""; t.hidden = true;
+      $("e-" + ck + "-box").innerHTML = "<span>Photo nahi hai</span>";
+      return;
+    }
     if (t.id === "e-new") { S.edit = "new"; return drawEntity(); }
     if (t.id === "e-cancel") { S.edit = null; return drawEntity(); }
     if (t.dataset.edit) { S.edit = Number(t.dataset.edit); drawEntity(); return window.scrollTo(0, 0); }
@@ -309,10 +401,21 @@
   view.addEventListener("submit", function (e) {
     e.preventDefault();
     if (e.target.id === "e-form") return saveEntity();
+    if (e.target.id === "t-form") {
+      var trows = [];
+      Q.TEXTS.forEach(function (g) { g[1].forEach(function (f) {
+        var v = $("t-" + f[0]).value.trim();
+        trows.push({ k: "t_" + f[0], v: v === f[2] ? "" : v }); // default jaisa ho to khaali, taaki default hi chale
+      }); });
+      sb.from("settings").upsert(trows).then(function (r) { r.error ? fail(r.error) : flash("Website ka text save ho gaya. Website refresh karke dekhein."); });
+    }
     if (e.target.id === "s-form") {
       var rows = [];
       SETTINGS.forEach(function (g) { g[1].forEach(function (f) { rows.push({ k: f[0], v: $("s-" + f[0]).value.trim().slice(0, 2000) }); }); });
-      sb.from("settings").upsert(rows).then(function (r) { r.error ? fail(r.error) : flash("Settings save ho gayi."); });
+      sb.from("settings").upsert(rows).then(function (r) {
+        if (r.error) return fail(r.error);
+        Q.setExams($("s-exams").value); flash("Settings save ho gayi.");
+      });
     }
     if (e.target.id === "p-form") {
       var p = $("p-new").value;

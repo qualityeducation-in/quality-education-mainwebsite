@@ -353,3 +353,9 @@ nav>a,.connect>button,.hdr-cta,.brand small{white-space:nowrap}
 nav>a,.connect>button{padding:8px 9px;font-size:.92rem}
 @media (max-width:1180px) and (min-width:961px){.brand small{display:none}.navbar{gap:10px}}
 @media (max-width:640px){.phone{width:250px}.p-row{white-space:nowrap;font-size:.82rem}}
+
+/* thumbnail photo: card ki wahi jagah, wahi size */
+.c-img.has-img{background:var(--line)}
+.c-img.has-img::after{display:none}
+.c-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.hero h1 b{font-weight:inherit}
