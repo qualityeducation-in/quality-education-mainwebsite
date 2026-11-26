@@ -66,13 +66,25 @@
       + (meta ? '<div class="c-meta">' + meta + "</div>" : "")
       + '<div class="c-foot">' + price + '<span class="btns">'
       + (embed ? '<button class="btn line sm" type="button" data-embed="' + esc(embed) + '">Watch Demo</button>' : "")
-      + '<a class="btn sm" ' + enq(x.exam, kind, x.title + " ke baare mein jaankari chahiye.") + ">Enquire</a></span></div></div></article>";
+      + '<a class="btn sm" ' + enq(x.exam, kind, x.title + (kind === "Book" ? " order karni hai." : " ke baare mein jaankari chahiye.")) + ">" + (kind === "Book" ? "Order" : "Enquire") + "</a></span></div></div></article>";
   }
   var note = function (t) { return '<p class="load-note">' + t + "</p>"; };
+
+  // Books section: upar ka banner (Settings se) aur neeche books ki list (admin > Books se).
+  var hasBanner = false, hasBooks = false;
+  function showBooks() {
+    $("book-banner").hidden = !hasBanner;
+    $("book-list-title").hidden = !(hasBanner && hasBooks);
+    $("books").hidden = !hasBanner && !hasBooks;
+  }
 
   function renderItems(items) {
     var courses = items.filter(function (x) { return x.kind === "course"; });
     var tests = items.filter(function (x) { return x.kind === "test"; });
+    var books = items.filter(function (x) { return x.kind === "book"; });
+    $("book-grid").innerHTML = books.map(function (b) { return card(b, "Book"); }).join("");
+    hasBooks = books.length > 0;
+    showBooks();
     var exams = courses.map(function (c) { return c.exam; }).filter(function (e, i, a) { return a.indexOf(e) === i; });
     $("course-chips").innerHTML = exams.length > 1
       ? '<button class="chip" type="button" aria-pressed="true" data-f="">All</button>' + exams.map(function (e) {
@@ -115,7 +127,8 @@
     $("hero-stats").innerHTML = Q.pairs(get("hero_stats")).map(function (p) { return "<div><b>" + esc(p[0]) + "</b><small>" + esc(p[1]) + "</small></div>"; }).join("");
     $("result-stats").innerHTML = Q.pairs(get("result_stats")).map(function (p) { return "<div><b>" + esc(p[0]) + "</b><span>" + esc(p[1]) + "</span></div>"; }).join("");
 
-    $("books").hidden = !get("book_title");
+    hasBanner = !!get("book_title");
+    showBooks();
     $("book-title").textContent = get("book_title");
     $("book-desc").textContent = get("book_desc");
     $("book-points").innerHTML = Q.pairs(get("book_points")).map(function (p) { return "<span>" + icon("check") + esc(p[0]) + "</span>"; }).join("");

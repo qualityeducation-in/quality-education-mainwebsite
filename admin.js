@@ -19,6 +19,16 @@
   var ENT = {
     courses: { label: "Video Courses", one: "Video Course", table: "items", fixed: { kind: "course" }, fields: itemFields, cols: ["title", "exam", "price", "video_url", "is_active"] },
     tests: { label: "Test Series", one: "Test Series", table: "items", fixed: { kind: "test" }, fields: itemFields, cols: ["title", "exam", "price", "is_active"] },
+    books: {
+      label: "Books", one: "Book", table: "items", fixed: { kind: "book" }, cols: ["title", "exam", "price", "is_active"],
+      hint: "Yahan jodi gayi har book website ke Books section mein card ke roop mein dikhti hai. Fee khaali chhodne par \"Fee ke liye enquiry karein\" dikhega.",
+      fields: itemFields.map(function (f) {
+        if (f[0] === "meta") return ["meta", 'Highlights, " · " se alag karein (jaise 450 Pages · PYQ 2018-2024)', "text", 120];
+        if (f[0] === "price") return ["price", 'Price ₹ (khaali = "enquiry karein")', "number"];
+        if (f[0] === "video_url") return ["video_url", "Book ka video link (YouTube ya Instagram, optional)", "text", 300];
+        return f;
+      })
+    },
     reels: {
       label: "Videos / Reels", one: "Video", table: "reels", fixed: {}, cols: ["title", "url", "is_active"],
       hint: "Instagram reel ya YouTube video ka link paste karein. Website par click karte hi video wahin popup mein chalegi. Channel ya profile ka link ho to naya tab khulega.",
@@ -102,7 +112,7 @@
   $("logout").addEventListener("click", function () { sb.auth.signOut().then(function () { showLogin(""); }); });
 
   if (!sb) {
-    showLogin("Supabase ki details nahi mili. assets/config.js mein URL aur key bharein.");
+    showLogin("Supabase ki details nahi mili. config.js mein URL aur key bharein.");
   } else {
     sb.auth.getSession().then(function (r) { if (r.data && r.data.session) enter(); });
   }
