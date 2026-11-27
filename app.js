@@ -197,7 +197,8 @@
     $("app-grid").innerHTML = apps.map(function (a) {
       var link = Q.safeLink(Q.SET[a[2]]), name = T(a[1] + "_t");
       return '<div class="app"><i>' + icon(a[0]) + "</i><h3>" + esc(name) + "</h3><p>" + esc(T(a[1] + "_d")) + "</p>"
-        + (link ? '<a class="btn dark" href="' + esc(link) + '" target="_blank" rel="noopener">' + esc(T(a[1] + "_btn")) + "</a>"
+        // Link kisi file ka ho (jaise .exe) to click karte hi download shuru hota hai; warna naya tab khulta hai.
+        + (link ? '<a class="btn dark" href="' + esc(link) + '"' + (/\.(exe|msi|msix|zip|apk|dmg)(\?.*)?$/i.test(link) ? " download" : ' target="_blank" rel="noopener"') + ">" + esc(T(a[1] + "_btn")) + "</a>"
           : '<a class="btn line" ' + Q.enqAttrs("Other", "Video Course", name + " ka link chahiye.") + ">" + esc(T("app_ask")) + "</a>")
         + "</div>";
     }).join("");
