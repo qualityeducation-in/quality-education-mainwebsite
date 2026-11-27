@@ -13,6 +13,7 @@
     ["price", 'Price (₹). Leave empty to show "Enquire for price"', "number"],
     ["mrp", "MRP (₹). Shown struck through next to the price (optional)", "number"],
     ["video_url", "Demo video link (YouTube or Instagram, optional)", "text", 300],
+    ["buy_url", 'Buy Now link. The page where the student buys this item. Leave empty to show the "Enquire" button instead', "text", 500],
     ["sort", "Display order (lower number first)", "number"],
     ["is_free", "Free", "check"],
     ["is_active", "Show on website", "check"]

@@ -76,7 +76,7 @@
     var tag = x.tag || (x.is_free ? "Free" : "");
     var meta = String(x.meta || "").split("·").map(function (m) { return m.trim(); }).filter(Boolean)
       .map(function (m) { return "<b>" + esc(m) + "</b>"; }).join("");
-    var embed = Q.embedUrl(x.video_url), photo = Q.safeLink(x.image_url), isBook = interest === "Book";
+    var embed = Q.embedUrl(x.video_url), photo = Q.safeLink(x.image_url), buy = Q.safeLink(x.buy_url), isBook = interest === "Book";
     // Thumbnail ho to wahi dikhti hai (poori, 16:9). Na ho to exam ke naam wala rangeen design, usi size mein.
     var top = photo
       ? '<div class="c-img has-img"><img src="' + esc(photo) + '" alt="" loading="lazy"></div>'
@@ -87,8 +87,11 @@
       + (meta ? '<div class="c-meta">' + meta + "</div>" : "")
       + '<div class="c-foot">' + price + '<span class="btns">'
       + (embed ? '<button class="btn line sm" type="button" data-embed="' + esc(embed) + '">' + esc(T("btn_demo")) + "</button>" : "")
-      + '<a class="btn sm" ' + Q.enqAttrs(x.exam, interest, (isBook ? "I want to order " : "I would like more information about ") + x.title + ".") + ">"
-      + esc(T(isBook ? "btn_order" : "btn_enquire")) + "</a></span></div></div></article>";
+      // Buy Now ka link bhara ho to button seedha us page par le jata hai; warna enquiry form khulta hai.
+      + (buy ? '<a class="btn sm" href="' + esc(buy) + '" target="_blank" rel="noopener">' + esc(T("btn_buy")) + "</a>"
+        : '<a class="btn sm" ' + Q.enqAttrs(x.exam, interest, (isBook ? "I want to order " : "I would like more information about ") + x.title + ".") + ">"
+          + esc(T(isBook ? "btn_order" : "btn_enquire")) + "</a>")
+      + "</span></div></div></article>";
   };
 
   Q.reelHtml = function (r, i) {

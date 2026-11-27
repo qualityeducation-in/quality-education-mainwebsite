@@ -95,7 +95,8 @@
       ["courses_title", "Main heading", "Featured Courses"],
       ["chip_all", "First filter button", "All"],
       ["view_all", "View all button (shown when there are more than 8 items)", "View All"],
-      ["btn_enquire", "Card button", "Enquire"],
+      ["btn_enquire", "Card button (when no Buy Now link is set)", "Enquire"],
+      ["btn_buy", "Card button (when a Buy Now link is set)", "Buy Now"],
       ["btn_demo", "Demo video button", "Watch Demo"],
       ["fee_note", "Text shown when the price is empty", "Enquire for price"]]],
     ["Test Series section", [
