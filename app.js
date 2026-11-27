@@ -230,6 +230,16 @@
     $("book-desc").textContent = get("book_desc");
     $("book-points").innerHTML = Q.pairs(get("book_points")).map(function (p) { return "<span>" + icon("check") + esc(p[0]) + "</span>"; }).join("");
     $("book-btn").dataset.msg = "I want to order " + get("book_title") + ".";
+    // Book ki photo (admin > Settings > Book Banner). Photo ho to bana hua cover chhup jata hai.
+    var photo = Q.safeLink(get("book_image"));
+    $("book-photo").hidden = !photo;
+    if (photo) { $("book-photo").src = photo; $("book-photo").alt = get("book_title"); }
+    $("book-cover").hidden = !!photo;
+    $("book-cover").classList.toggle("no-text", get("book_cover_hide") === "1");
+    // Button: link bhara ho to seedha us page par, warna enquiry form.
+    var bbtn = $("book-btn"), buy = Q.safeLink(get("book_buy_url"));
+    if (buy) { bbtn.href = buy; bbtn.target = "_blank"; bbtn.rel = "noopener"; bbtn.removeAttribute("data-enq"); }
+    else { bbtn.href = "#contact"; bbtn.removeAttribute("target"); bbtn.setAttribute("data-enq", ""); }
 
     if (get("phone")) {
       document.querySelectorAll("[data-phone]").forEach(function (el) { el.textContent = get("phone"); });

@@ -506,3 +506,8 @@ nav>a,.connect>button{padding:8px 8px;font-size:.9rem}
   .brand.logo-only .brand-mark.has-logo{height:42px}
   .brand.logo-only .brand-mark.has-logo img{max-width:170px}
 }
+
+/* ---------- book banner: asli book ki photo ---------- */
+.book-photo{justify-self:center;display:block;width:auto;max-width:min(100%,280px);max-height:360px;border-radius:10px;box-shadow:22px 28px 50px -20px rgba(10,22,64,.55);transform:rotate(3deg)}
+.cover.no-text>*{visibility:hidden}
+@media (max-width:640px){.book-photo{max-width:200px;max-height:270px}}
