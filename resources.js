@@ -52,7 +52,7 @@
     render();
   });
 
-  function failed() { render(); $("doc-list").innerHTML = note("Abhi list load nahi ho saki. Thodi der baad dobara dekhein."); }
+  function failed() { render(); $("doc-list").innerHTML = note("Unable to load the list right now. Please try again in a little while."); }
 
   if (!sb) return failed();
   Promise.all([

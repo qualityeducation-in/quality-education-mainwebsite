@@ -27,7 +27,7 @@
     if (photo) { $("post-img").src = photo; $("post-img").hidden = false; }
     $("post-body").innerHTML = Q.richText(p.body);
   }
-  function failed() { common(); $("post-grid").innerHTML = note("Abhi blog load nahi ho saka. Thodi der baad dobara dekhein."); }
+  function failed() { common(); $("post-grid").innerHTML = note("Unable to load the blog right now. Please try again in a little while."); }
 
   if (!sb) return failed();
   var posts = id
@@ -38,7 +38,7 @@
     if (r[0].error) return failed();
     var rows = r[0].data || [];
     if (id && rows[0]) showPost(rows[0]);
-    else if (id) { history.replaceState(null, "", "blog.html"); failed(); $("post-grid").innerHTML = note("Yeh post nahi mili."); }
+    else if (id) { history.replaceState(null, "", "blog.html"); failed(); $("post-grid").innerHTML = note("This post could not be found."); }
     else showList(rows);
   }).catch(failed);
 })();

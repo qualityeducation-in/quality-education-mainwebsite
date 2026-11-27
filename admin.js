@@ -6,90 +6,90 @@
   var itemFields = [
     ["title", "Title", "text", 150, true],
     ["exam", "Exam", "select", Q.EXAMS],
-    ["tag", "Badge (jaise Most Popular)", "text", 40],
-    ["meta", 'Highlights, " · " se alag karein (jaise 12 Months · PDF Notes)', "text", 120],
+    ["tag", "Badge (e.g. Most Popular)", "text", 40],
+    ["meta", 'Highlights, separated by " · " (e.g. 12 Months · PDF Notes)', "text", 120],
     ["descr", "Description", "textarea", 500],
     ["image_url", "Thumbnail photo", "image"],
-    ["price", 'Fee ₹ (khaali = "enquiry karein")', "number"],
-    ["mrp", "MRP ₹ (kati hui keemat, optional)", "number"],
-    ["video_url", "Demo video link (YouTube ya Instagram, optional)", "text", 300],
-    ["sort", "Order (chhota number pehle)", "number"],
-    ["is_free", "Free hai", "check"],
-    ["is_active", "Website par dikhayein", "check"]
+    ["price", 'Price (₹). Leave empty to show "Enquire for price"', "number"],
+    ["mrp", "MRP (₹). Shown struck through next to the price (optional)", "number"],
+    ["video_url", "Demo video link (YouTube or Instagram, optional)", "text", 300],
+    ["sort", "Display order (lower number first)", "number"],
+    ["is_free", "Free", "check"],
+    ["is_active", "Show on website", "check"]
   ];
   var ENT = {
     courses: { label: "Video Courses", one: "Video Course", table: "items", fixed: { kind: "course" }, fields: itemFields, cols: ["title", "exam", "price", "video_url", "is_active"] },
     tests: { label: "Test Series", one: "Test Series", table: "items", fixed: { kind: "test" }, fields: itemFields, cols: ["title", "exam", "price", "is_active"] },
     books: {
       label: "Books", one: "Book", table: "items", fixed: { kind: "book" }, cols: ["title", "exam", "price", "is_active"],
-      hint: "Yahan jodi gayi har book website ke Books section mein card ke roop mein dikhti hai. Fee khaali chhodne par \"Fee ke liye enquiry karein\" dikhega.",
+      hint: "Every book added here appears as a card in the Books section of the website. If the price is left empty, \"Enquire for price\" is shown.",
       fields: itemFields.map(function (f) {
-        if (f[0] === "meta") return ["meta", 'Highlights, " · " se alag karein (jaise 450 Pages · PYQ 2018-2024)', "text", 120];
-        if (f[0] === "price") return ["price", 'Price ₹ (khaali = "enquiry karein")', "number"];
-        if (f[0] === "video_url") return ["video_url", "Book ka video link (YouTube ya Instagram, optional)", "text", 300];
+        if (f[0] === "meta") return ["meta", 'Highlights, separated by " · " (e.g. 450 Pages · PYQ 2018-2024)', "text", 120];
+        if (f[0] === "price") return ["price", 'Price (₹). Leave empty to show "Enquire for price"', "number"];
+        if (f[0] === "video_url") return ["video_url", "Book video link (YouTube or Instagram, optional)", "text", 300];
         return f;
       })
     },
     reels: {
       label: "Videos / Reels", one: "Video", table: "reels", fixed: {}, cols: ["title", "url", "is_active"],
-      hint: "Instagram reel ya YouTube video ka link paste karein. Website par card par thumbnail dikhti hai aur click karte hi video usi box mein chalti hai. Channel ya profile ka link ho to naya tab khulega.",
+      hint: "Paste the link of an Instagram reel or a YouTube video. The website shows its thumbnail on a card, and the video plays in the same box when clicked. A channel or profile link opens in a new tab.",
       fields: [
         ["title", "Title", "text", 100, true],
-        ["subtitle", "Chhoti line (jaise Faculty Reel)", "text", 100],
-        ["url", "Instagram reel ya YouTube video ka link", "text", 300, true],
-        ["image_url", "Thumbnail photo", "image", "YouTube ki thumbnail apne aap aa jati hai, yahan photo lagane ki zaroorat nahi. Instagram reel ke liye yahan photo lagayein (khadi photo, 720 × 1280 sabse achhi), warna card par sirf rang dikhega. JPG, PNG ya WebP.", false, "tall"],
-        ["sort", "Order (chhota number pehle)", "number"],
-        ["is_active", "Website par dikhayein", "check"]
+        ["subtitle", "Subtitle (e.g. Faculty Reel)", "text", 100],
+        ["url", "Instagram reel or YouTube video link", "text", 300, true],
+        ["image_url", "Thumbnail photo", "image", "YouTube thumbnails are added automatically, so no image is needed here. For an Instagram reel, upload a portrait image (720 × 1280 recommended); otherwise the card shows a plain colour. JPG, PNG or WebP.", false, "tall"],
+        ["sort", "Display order (lower number first)", "number"],
+        ["is_active", "Show on website", "check"]
       ]
     },
     docs: {
       label: "PDFs", one: "PDF", table: "docs", fixed: {}, order: "created_at", cols: ["title", "category", "file_url", "is_active"],
-      hint: "Yahan jodi gayi har PDF website ke Resources wale page par us section mein dikhti hai jo aap chunte hain, View aur Download button ke saath. Nayi PDF sabse upar aati hai.",
+      hint: "Every PDF added here appears on the Resources page of the website, in the section you choose, with View and Download buttons. The newest PDF is listed first.",
       fields: [
-        ["title", "PDF ka naam (jaise 25 November 2026 Current Affairs)", "text", 150, true],
-        ["category", "Kis section mein dikhe", "select", Q.DOC_CATS.map(function (c) { return [c[0], Q.TEXT[c[1]]]; })],
-        ["descr", "Chhoti jaankari (optional)", "text", 200],
-        ["file_url", "PDF file", "pdf", "Computer se PDF chunein (20 MB tak). Ya agar PDF Google Drive jaisi jagah par hai to uska link upar ke box mein paste kar dein.", true],
-        ["is_active", "Website par dikhayein", "check"]
+        ["title", "PDF title (e.g. 25 November 2026 Current Affairs)", "text", 150, true],
+        ["category", "Section", "select", Q.DOC_CATS.map(function (c) { return [c[0], Q.TEXT[c[1]]]; })],
+        ["descr", "Short description (optional)", "text", 200],
+        ["file_url", "PDF file", "pdf", "Choose a PDF from your computer (up to 20 MB). If the PDF is hosted elsewhere, such as Google Drive, paste its link in the box above instead.", true],
+        ["is_active", "Show on website", "check"]
       ]
     },
     posts: {
       label: "Blog", one: "Blog Post", table: "posts", fixed: {}, order: "created_at", cols: ["title", "created_at", "is_active"],
-      hint: "Har post website ke Blog page par dikhti hai, aur sabse nayi posts home page par bhi. Nayi post sabse upar aati hai.",
+      hint: "Every post appears on the Blog page of the website, and the latest posts also appear on the home page. The newest post is listed first.",
       fields: [
-        ["title", "Post ka title", "text", 150, true],
-        ["summary", "Chhota saar (card par dikhta hai, 1-2 line)", "textarea", 300],
-        ["image_url", "Post ki photo (optional)", "image", "Sabse achha size 1280 × 720 (16:9). JPG, PNG ya WebP."],
-        ["body", "Poora lekh", "longtext", 30000, true],
-        ["is_active", "Website par dikhayein", "check"]
+        ["title", "Post title", "text", 150, true],
+        ["summary", "Summary (shown on the card, 1-2 lines)", "textarea", 300],
+        ["image_url", "Post image (optional)", "image", "Recommended size: 1280 × 720 (16:9). JPG, PNG or WebP."],
+        ["body", "Full article", "longtext", 30000, true],
+        ["is_active", "Show on website", "check"]
       ]
     },
     results: {
       label: "Results", one: "Selected Student", table: "results", fixed: {}, cols: ["name", "detail"],
       fields: [
-        ["name", "Student ka naam", "text", 100, true],
-        ["detail", "Detail (jaise Selected in RAS 2018)", "text", 200],
-        ["sort", "Order (chhota number pehle)", "number"]
+        ["name", "Student name", "text", 100, true],
+        ["detail", "Detail (e.g. Selected in RAS 2018)", "text", 200],
+        ["sort", "Display order (lower number first)", "number"]
       ]
     }
   };
   var SETTINGS = [
-    ["Exams ki list", [
-      ["exams", "Har line mein ek exam. Yahi list course ke Exam, website ke filter button, upar ki chalti patti aur enquiry form mein aati hai. \"Other\" apne aap aakhir mein judta hai.", true]]],
-    ["Notice aur Contact", [
-      ["notice_text", "Upar ki notice patti (khaali = patti band)"], ["phone", "Phone / WhatsApp number"],
+    ["Exam List", [
+      ["exams", "One exam per line. This list is used for the Exam field of courses, the filter buttons on the website, the scrolling strip in the hero and the enquiry form. \"Other\" is added at the end automatically.", true]]],
+    ["Notice and Contact", [
+      ["notice_text", "Notice bar text (leave empty to hide the bar)"], ["phone", "Phone / WhatsApp number"],
       ["email", "Support email"], ["address", "Offices"]]],
-    ["Numbers (har line: number|label)", [
-      ["hero_stats", "Hero ke 4 numbers", true], ["result_stats", "Results ke numbers", true]]],
+    ["Statistics (one per line: number|label)", [
+      ["hero_stats", "Hero statistics (4)", true], ["result_stats", "Results statistics", true]]],
     ["Book section", [
-      ["book_title", "Book ka title (khaali = section band)"], ["book_desc", "Book ki jaankari", true],
-      ["book_points", "Khaas baatein (har line mein ek)", true]]],
-    ["App aur Social links (khaali = nahi dikhega)", [
+      ["book_title", "Book title (leave empty to hide the banner)"], ["book_desc", "Book description", true],
+      ["book_points", "Highlights (one per line)", true]]],
+    ["App and Social Links (leave empty to hide)", [
       ["play_url", "Play Store link"], ["ios_url", "App Store link"], ["windows_url", "Windows app link"],
       ["instagram", "Instagram"], ["youtube", "YouTube"], ["telegram", "Telegram"], ["whatsapp_channel", "WhatsApp Channel"],
       ["facebook", "Facebook"], ["twitter", "Twitter / X"], ["linkedin", "LinkedIn"]]]
   ];
-  var COL_LABEL = { is_active: "Status", video_url: "Demo video", url: "Link", price: "Fee", category: "Section", file_url: "File", created_at: "Date" };
+  var COL_LABEL = { is_active: "Status", video_url: "Demo video", url: "Link", price: "Price", category: "Section", file_url: "File", created_at: "Date" };
 
   var S = { tab: "enquiries", edit: null, rows: [], enq: [], fq: "", fs: "" };
   var view = $("view");
@@ -103,7 +103,7 @@
     flashTimer = setTimeout(function () { f.hidden = true; }, 4500);
   }
   function fail(error) {
-    flash("Kaam nahi ho saka" + (error && error.message ? ": " + error.message : ". Dobara koshish karein."), true);
+    flash("Something went wrong" + (error && error.message ? ": " + error.message : ". Please try again."), true);
   }
   function fmtDate(t) {
     return t ? new Date(t).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
@@ -118,7 +118,7 @@
   function enter() {
     sb.rpc("is_admin").then(function (r) {
       if (r.error || r.data !== true) {
-        return sb.auth.signOut().then(function () { showLogin("Is account ko admin access nahi diya gaya hai."); });
+        return sb.auth.signOut().then(function () { showLogin("This account does not have admin access."); });
       }
       $("body").className = ""; $("login").hidden = true; $("app").hidden = false;
       drawTabs();
@@ -134,7 +134,7 @@
     $("l-btn").disabled = true; $("login-msg").textContent = "";
     sb.auth.signInWithPassword({ email: $("l-email").value.trim(), password: $("l-pass").value }).then(function (r) {
       $("l-btn").disabled = false;
-      if (r.error) return showLogin("Email ya password galat hai.");
+      if (r.error) return showLogin("Incorrect email or password.");
       $("l-pass").value = "";
       enter();
     });
@@ -142,7 +142,7 @@
   $("logout").addEventListener("click", function () { sb.auth.signOut().then(function () { showLogin(""); }); });
 
   if (!sb) {
-    showLogin("Supabase ki details nahi mili. config.js mein URL aur key bharein.");
+    showLogin("Supabase details are missing. Add the project URL and key in config.js.");
   } else {
     sb.auth.getSession().then(function (r) { if (r.data && r.data.session) enter(); });
   }
@@ -162,7 +162,7 @@
   });
 
   function render() {
-    view.innerHTML = '<p class="loading">Load ho raha hai…</p>';
+    view.innerHTML = '<p class="loading">Loading…</p>';
     if (S.tab === "enquiries") loadEnquiries();
     else if (S.tab === "settings") loadSettings();
     else if (S.tab === "texts") loadTexts();
@@ -184,7 +184,7 @@
   }
   function enqRows() {
     var rows = filteredEnq();
-    if (!rows.length) return '<tr><td colspan="9" class="none">' + (S.enq.length ? "Is filter mein koi enquiry nahi hai." : "Abhi koi enquiry nahi aayi hai. Website ke form se aayi har enquiry yahan dikhegi.") + "</td></tr>";
+    if (!rows.length) return '<tr><td colspan="9" class="none">' + (S.enq.length ? "No enquiries match this filter." : "No enquiries yet. Every enquiry sent from the website form will appear here.") + "</td></tr>";
     return rows.map(function (x) {
       return '<tr><td class="num">' + fmtDate(x.created_at) + "</td><td><b>" + esc(x.name) + '</b></td><td class="num"><a href="tel:+91' + esc(x.phone) + '">' + esc(x.phone) + "</a></td><td>"
         + esc(x.exam) + "</td><td>" + esc(x.interest) + "</td><td>" + esc(x.city) + "</td><td>" + esc(x.message) + "</td>"
@@ -199,9 +199,9 @@
     view.innerHTML = "<h1>Student Enquiries</h1>"
       + '<div class="tiles"><div class="tile"><b>' + S.enq.length + '</b><span>Total</span></div><div class="tile t-new"><b>' + c("new") + '</b><span>New</span></div>'
       + '<div class="tile t-con"><b>' + c("contacted") + '</b><span>Contacted</span></div><div class="tile t-enr"><b>' + c("enrolled") + "</b><span>Enrolled</span></div></div>"
-      + '<div class="tools"><input type="search" id="fq" value="' + esc(S.fq) + '" placeholder="Name, mobile ya city" aria-label="Search">'
+      + '<div class="tools"><input type="search" id="fq" value="' + esc(S.fq) + '" placeholder="Search by name, mobile or city" aria-label="Search">'
       + '<select id="fs" aria-label="Status"><option value="">All status</option>' + Q.STATUSES.map(function (s) { return '<option value="' + s + '"' + (S.fs === s ? " selected" : "") + ">" + cap(s) + "</option>"; }).join("") + "</select>"
-      + '<button class="btn sm line" type="button" id="csv">Excel (CSV) download</button></div>'
+      + '<button class="btn sm line" type="button" id="csv">Download Excel (CSV)</button></div>'
       + '<div class="scroll"><table><thead><tr><th>Date</th><th>Name</th><th>Mobile</th><th>Exam</th><th>Interest</th><th>City</th><th>Message</th><th>Status</th><th></th></tr></thead><tbody id="enq-body">' + enqRows() + "</tbody></table></div>";
   }
   function downloadCsv() {
@@ -240,22 +240,22 @@
     if (type === "image") {
       var url = Q.safeLink(val);
       return '<div class="full imgf"><span class="lbl">' + label + '</span><div class="imgrow">'
-        + '<div class="thumb' + (f[5] === "tall" ? " tall" : "") + '" id="e-' + k + '-box">' + (url ? '<img src="' + esc(url) + '" alt="">' : "<span>Photo nahi hai</span>") + "</div>"
+        + '<div class="thumb' + (f[5] === "tall" ? " tall" : "") + '" id="e-' + k + '-box">' + (url ? '<img src="' + esc(url) + '" alt="">' : "<span>No image</span>") + "</div>"
         + '<div class="imgctl"><input type="file" id="e-' + k + '-file" accept="image/png,image/jpeg,image/webp" aria-label="' + label + '">'
         + '<input type="hidden" id="e-' + k + '" value="' + esc(url) + '">'
-        + '<button class="link del" type="button" data-clear-img="' + k + '"' + (url ? "" : " hidden") + ">Photo hatayein</button>"
-        + "<small>" + esc(f[3] || "Sabse achha size 1280 × 720 (YouTube thumbnail jaisa, 16:9). Is naap ki photo card par poori dikhti hai, kuch nahi katta. JPG, PNG ya WebP.") + "</small></div></div></div>";
+        + '<button class="link del" type="button" data-clear-img="' + k + '"' + (url ? "" : " hidden") + ">Remove image</button>"
+        + "<small>" + esc(f[3] || "Recommended size: 1280 × 720 (16:9, same as a YouTube thumbnail). An image of this size is shown in full on the card without cropping. JPG, PNG or WebP.") + "</small></div></div></div>";
     }
     if (type === "pdf") {
       return '<div class="full imgf"><span class="lbl">' + label + '</span><div class="imgctl">'
-        + '<input id="e-' + k + '" maxlength="500" placeholder="PDF ka link (file chunne par apne aap bhar jayega)" value="' + esc(val) + '">'
+        + '<input id="e-' + k + '" maxlength="500" placeholder="PDF link (filled in automatically when you choose a file)" value="' + esc(val) + '">'
         + '<input type="file" id="e-' + k + '-file" accept="application/pdf,.pdf" aria-label="' + label + '">'
-        + (val ? '<a href="' + esc(Q.safeLink(val)) + '" target="_blank" rel="noopener">Abhi lagi hui PDF dekhein ↗</a>' : "")
+        + (val ? '<a href="' + esc(Q.safeLink(val)) + '" target="_blank" rel="noopener">View current PDF ↗</a>' : "")
         + "<small>" + esc(f[3]) + "</small></div></div>";
     }
     if (type === "longtext") {
       return '<label class="full">' + label + '<textarea id="e-' + k + '" rows="16" maxlength="' + f[3] + '">' + esc(val) + "</textarea>"
-        + '<small class="help">Likhne ka tareeka: naya paragraph ke liye ek line khaali chhodein. Heading ke liye line ke shuru mein "## " lagayein. Bullet ke liye har line "- " se shuru karein. Mota likhne ke liye **shabd**. Link seedha paste karein, wo apne aap click hone wala ban jata hai.</small></label>';
+        + '<small class="help">Formatting: leave a blank line to start a new paragraph. Start a line with "## " for a heading. Start each line with "- " for bullet points. Use **word** for bold text. Paste links as they are; they become clickable automatically.</small></label>';
     }
     if (type === "textarea") return '<label class="full">' + label + '<textarea id="e-' + k + '" rows="3" maxlength="' + f[3] + '">' + esc(val) + "</textarea></label>";
     if (type === "number") return "<label>" + label + '<input id="e-' + k + '" inputmode="numeric" value="' + (Number(val) ? Number(val) : "") + '"></label>';
@@ -269,7 +269,7 @@
       var short = r[c].length > 42 ? r[c].slice(0, 41) + "…" : r[c];
       return (Q.embedUrl(r[c]) ? "Video ✓" : "Link") + " <small>" + esc(short) + "</small>";
     }
-    if (c === "file_url") return r[c] ? '<a href="' + esc(Q.safeLink(r[c])) + '" target="_blank" rel="noopener">PDF kholein ↗</a>' : "—";
+    if (c === "file_url") return r[c] ? '<a href="' + esc(Q.safeLink(r[c])) + '" target="_blank" rel="noopener">Open PDF ↗</a>' : "—";
     if (c === "created_at") return esc(fmtDate(r[c]).split(",")[0]);
     if (c === "category") {
       var cat = Q.DOC_CATS.filter(function (x) { return x[0] === r[c]; })[0];
@@ -285,17 +285,17 @@
     }
     var form = "";
     if (S.edit !== null) {
-      form = '<form class="panel" id="e-form"><h2>' + (cur ? "Edit: " + esc(cur[E.fields[0][0]]) : "Naya " + esc(E.one)) + '</h2><div class="fields">'
+      form = '<form class="panel" id="e-form"><h2>' + (cur ? "Edit: " + esc(cur[E.fields[0][0]]) : "New " + esc(E.one)) + '</h2><div class="fields">'
         + E.fields.map(function (f) { return fieldHtml(f, cur); }).join("")
         + '</div><button class="btn" type="submit" id="e-save">Save</button> <button class="btn line" type="button" id="e-cancel">Cancel</button></form>';
     }
-    view.innerHTML = '<div class="head"><h1>' + esc(E.label) + '</h1><button class="btn sm" type="button" id="e-new">+ Naya ' + esc(E.one) + "</button></div>"
+    view.innerHTML = '<div class="head"><h1>' + esc(E.label) + '</h1><button class="btn sm" type="button" id="e-new">+ Add ' + esc(E.one) + "</button></div>"
       + (E.hint ? '<p class="hint">' + esc(E.hint) + "</p>" : "") + form
       + '<div class="scroll"><table><thead><tr>' + E.cols.map(function (c) { return "<th>" + (COL_LABEL[c] || cap(c)) + "</th>"; }).join("") + "<th></th></tr></thead><tbody>"
       + (S.rows.length ? S.rows.map(function (r) {
         return "<tr>" + E.cols.map(function (c) { return "<td>" + cellHtml(E, c, r) + "</td>"; }).join("")
           + '<td class="acts"><button class="link" type="button" data-edit="' + r.id + '">Edit</button><button class="link del" type="button" data-del="' + r.id + '">Delete</button></td></tr>';
-      }).join("") : '<tr><td colspan="' + (E.cols.length + 1) + '" class="none">Abhi kuch nahi joda gaya hai. Upar ke button se jodein.</td></tr>')
+      }).join("") : '<tr><td colspan="' + (E.cols.length + 1) + '" class="none">Nothing has been added yet. Use the button above to add one.</td></tr>')
       + "</tbody></table></div>";
   }
   function saveEntity() {
@@ -314,10 +314,10 @@
       else data[f[0]] = el.value.trim();
       if (f[4] && !data[f[0]] && !missing) missing = f;
     });
-    if (missing) { flash(missing[1] + " bharna zaroori hai.", true); $("e-" + missing[0]).focus(); return; }
-    if (badLink) { flash("PDF ka link https:// se shuru hona chahiye, ya computer se file chunein.", true); return; }
+    if (missing) { flash(missing[1] + " is required.", true); $("e-" + missing[0]).focus(); return; }
+    if (badLink) { flash("The PDF link must start with https://, or choose a file from your computer.", true); return; }
     var btn = $("e-save");
-    btn.disabled = true; btn.textContent = uploads.length ? "File upload ho rahi hai…" : "Save ho raha hai…";
+    btn.disabled = true; btn.textContent = uploads.length ? "Uploading…" : "Saving…";
     var done = function () { btn.disabled = false; btn.textContent = "Save"; };
     Promise.all(uploads.map(function (u) {
       if (u[2] === "pdf") return uploadPdf(u[1], data.category || "pdf").then(function (url) { data[u[0]] = url; data.file_size = u[1].size; });
@@ -326,7 +326,7 @@
       return S.edit === "new" ? sb.from(E.table).insert(data) : sb.from(E.table).update(data).eq("id", S.edit);
     }).then(function (r) {
       if (r.error) { done(); return fail(r.error); }
-      S.edit = null; flash(E.one + " save ho gaya."); loadEntity();
+      S.edit = null; flash(E.one + " saved."); loadEntity();
     }).catch(function (err) { done(); fail(err); });
   }
 
@@ -350,23 +350,23 @@
     });
   }
   function uploadPdf(file, folder) {
-    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) return Promise.reject({ message: "Sirf PDF file chalegi." });
-    if (file.size > 20 * 1024 * 1024) return Promise.reject({ message: "PDF 20 MB se chhoti honi chahiye. Badi file ho to use Google Drive par daal kar uska link lagayein." });
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) return Promise.reject({ message: "Only PDF files are allowed." });
+    if (file.size > 20 * 1024 * 1024) return Promise.reject({ message: "The PDF must be smaller than 20 MB. For a larger file, upload it to Google Drive and paste its link instead." });
     var clean = file.name.replace(/\.pdf$/i, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "file";
     var path = folder + "/" + Date.now() + "-" + clean + ".pdf";
     return sb.storage.from("docs").upload(path, file, { contentType: "application/pdf", cacheControl: "3600" }).then(function (r) {
-      if (r.error) throw { message: "PDF upload nahi ho saki (" + r.error.message + ")" };
+      if (r.error) throw { message: "The PDF could not be uploaded (" + r.error.message + ")" };
       return sb.storage.from("docs").getPublicUrl(path).data.publicUrl;
     });
   }
   function uploadImage(file, folder) {
-    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return Promise.reject({ message: "Sirf JPG, PNG ya WebP photo chalegi." });
-    if (file.size > 8 * 1024 * 1024) return Promise.reject({ message: "Photo 8 MB se chhoti honi chahiye." });
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return Promise.reject({ message: "Only JPG, PNG or WebP images are allowed." });
+    if (file.size > 8 * 1024 * 1024) return Promise.reject({ message: "The image must be smaller than 8 MB." });
     return shrinkImage(file).then(function (blob) {
       var ext = blob.type === "image/jpeg" ? "jpg" : (blob.type === "image/png" ? "png" : "webp");
       var path = folder + "/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
       return sb.storage.from("thumbs").upload(path, blob, { contentType: blob.type, cacheControl: "31536000" }).then(function (r) {
-        if (r.error) throw { message: "Photo upload nahi ho saki (" + r.error.message + ")" };
+        if (r.error) throw { message: "The image could not be uploaded (" + r.error.message + ")" };
         return sb.storage.from("thumbs").getPublicUrl(path).data.publicUrl;
       });
     });
@@ -384,11 +384,11 @@
           return f[2] ? '<label class="full">' + esc(f[1]) + '<textarea id="s-' + f[0] + '" rows="4">' + esc(s[f[0]]) + "</textarea></label>"
             : "<label>" + esc(f[1]) + '<input id="s-' + f[0] + '" value="' + esc(s[f[0]]) + '"></label>';
         }).join("") + "</div>";
-      }).join("") + '<button class="btn" type="submit">Settings Save Karein</button></form>'
-        + '<form class="panel" id="p-form" style="max-width:520px"><h2>Password badlein</h2><div class="fields">'
-        + '<label class="full">Naya password (kam se kam 8 akshar)<input type="password" id="p-new" required minlength="8" autocomplete="new-password"></label>'
-        + '<label class="full">Naya password dobara<input type="password" id="p-again" required autocomplete="new-password"></label>'
-        + '</div><button class="btn" type="submit">Password Badlein</button></form>';
+      }).join("") + '<button class="btn" type="submit">Save Settings</button></form>'
+        + '<form class="panel" id="p-form" style="max-width:520px"><h2>Change Password</h2><div class="fields">'
+        + '<label class="full">New password (at least 8 characters)<input type="password" id="p-new" required minlength="8" autocomplete="new-password"></label>'
+        + '<label class="full">Confirm new password<input type="password" id="p-again" required autocomplete="new-password"></label>'
+        + '</div><button class="btn" type="submit">Change Password</button></form>';
     });
   }
 
@@ -399,7 +399,7 @@
       var s = {};
       (r.data || []).forEach(function (row) { s[row.k] = row.v; });
       view.innerHTML = '<div class="head"><h1>Website Text</h1></div>'
-        + '<p class="hint">Website par jo bhi likha hai wo yahan se badlein. Kisi box ko khaali chhod kar save karne par uska purana (default) text wapas aa jata hai. Courses, books, results aur phone number apne apne tab se badalte hain.</p>'
+        + '<p class="hint">Edit any text shown on the website from here. Leave a box empty and save to restore its default text. Courses, books, results and contact details are managed from their own tabs.</p>'
         + '<form id="t-form">' + Q.TEXTS.map(function (g) {
           return '<div class="panel"><h2>' + esc(g[0]) + '</h2><div class="fields">' + g[1].map(function (f) {
             var val = (s["t_" + f[0]] || "").trim() || f[2], long = f[3] || f[2].length > 60;
@@ -407,7 +407,7 @@
               ? '<textarea id="t-' + f[0] + '" rows="2" maxlength="400">' + esc(val) + "</textarea>"
               : '<input id="t-' + f[0] + '" maxlength="120" value="' + esc(val) + '">') + "</label>";
           }).join("") + "</div></div>";
-        }).join("") + '<div class="savebar"><button class="btn" type="submit">Saara Text Save Karein</button></div></form>';
+        }).join("") + '<div class="savebar"><button class="btn" type="submit">Save All Text</button></div></form>';
     });
   }
 
@@ -437,23 +437,23 @@
     if (t.dataset.clearImg) {
       var ck = t.dataset.clearImg;
       $("e-" + ck).value = ""; $("e-" + ck + "-file").value = ""; t.hidden = true;
-      $("e-" + ck + "-box").innerHTML = "<span>Photo nahi hai</span>";
+      $("e-" + ck + "-box").innerHTML = "<span>No image</span>";
       return;
     }
     if (t.id === "e-new") { S.edit = "new"; return drawEntity(); }
     if (t.id === "e-cancel") { S.edit = null; return drawEntity(); }
     if (t.dataset.edit) { S.edit = Number(t.dataset.edit); drawEntity(); return window.scrollTo(0, 0); }
-    if (t.dataset.del && window.confirm("Delete karein?")) {
+    if (t.dataset.del && window.confirm("Delete this item?")) {
       var E = ENT[S.tab];
       sb.from(E.table).delete().eq("id", Number(t.dataset.del)).then(function (r) {
         if (r.error) return fail(r.error);
-        flash(E.one + " delete ho gaya."); loadEntity();
+        flash(E.one + " deleted."); loadEntity();
       });
     }
-    if (t.dataset.delEnq && window.confirm("Yeh enquiry delete karein?")) {
+    if (t.dataset.delEnq && window.confirm("Delete this enquiry?")) {
       sb.from("enquiries").delete().eq("id", Number(t.dataset.delEnq)).then(function (r) {
         if (r.error) return fail(r.error);
-        flash("Enquiry delete ho gayi."); loadEnquiries();
+        flash("Enquiry deleted."); loadEnquiries();
       });
     }
   });
@@ -466,23 +466,23 @@
         var v = $("t-" + f[0]).value.trim();
         trows.push({ k: "t_" + f[0], v: v === f[2] ? "" : v }); // default jaisa ho to khaali, taaki default hi chale
       }); });
-      sb.from("settings").upsert(trows).then(function (r) { r.error ? fail(r.error) : flash("Website ka text save ho gaya. Website refresh karke dekhein."); });
+      sb.from("settings").upsert(trows).then(function (r) { r.error ? fail(r.error) : flash("Website text saved. Refresh the website to see the changes."); });
     }
     if (e.target.id === "s-form") {
       var rows = [];
       SETTINGS.forEach(function (g) { g[1].forEach(function (f) { rows.push({ k: f[0], v: $("s-" + f[0]).value.trim().slice(0, 2000) }); }); });
       sb.from("settings").upsert(rows).then(function (r) {
         if (r.error) return fail(r.error);
-        Q.setExams($("s-exams").value); flash("Settings save ho gayi.");
+        Q.setExams($("s-exams").value); flash("Settings saved.");
       });
     }
     if (e.target.id === "p-form") {
       var p = $("p-new").value;
-      if (p.length < 8) return flash("Password kam se kam 8 akshar ka rakhein.", true);
-      if (p !== $("p-again").value) return flash("Dono password alag hain.", true);
+      if (p.length < 8) return flash("The password must be at least 8 characters long.", true);
+      if (p !== $("p-again").value) return flash("The two passwords do not match.", true);
       sb.auth.updateUser({ password: p }).then(function (r) {
         if (r.error) return fail(r.error);
-        e.target.reset(); flash("Password badal gaya.");
+        e.target.reset(); flash("Password changed.");
       });
     }
   });

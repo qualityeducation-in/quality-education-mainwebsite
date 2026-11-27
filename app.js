@@ -143,7 +143,7 @@
         return '<button class="chip" type="button" aria-pressed="' + (courseFilter === e) + '" data-f="' + esc(e) + '">' + esc(e) + "</button>";
       }).join("") : "";
     var shown = courses.filter(function (c) { return !courseFilter || c.exam === courseFilter; });
-    fillLine("course-grid", "courses", shown, "Naye courses jald aa rahe hain. Jaankari ke liye enquiry bhejein.");
+    fillLine("course-grid", "courses", shown, "New courses are coming soon. Send an enquiry for details.");
     // "View All" usi exam ki list khole jo abhi chuni hui hai.
     var href = "all.html?type=courses" + (courseFilter ? "&exam=" + encodeURIComponent(courseFilter) : "");
     $("courses-all").href = href;
@@ -162,7 +162,7 @@
 
   function renderItems() {
     renderCourses();
-    fillLine("test-grid", "tests", ofKind("test"), "Nayi test series jald aa rahi hain.", "on-dark");
+    fillLine("test-grid", "tests", ofKind("test"), "New test series are coming soon.", "on-dark");
     var books = ofKind("book");
     fillLine("book-grid", "books", books, "");
     hasBooks = books.length > 0;
@@ -199,7 +199,7 @@
       return '<div class="app"><i>' + icon(a[0]) + "</i><h3>" + esc(name) + "</h3><p>" + esc(T(a[1] + "_d")) + "</p>"
         // Link kisi file ka ho (jaise .exe) to click karte hi download shuru hota hai; warna naya tab khulta hai.
         + (link ? '<a class="btn dark" href="' + esc(link) + '"' + (/\.(exe|msi|msix|zip|apk|dmg)(\?.*)?$/i.test(link) ? " download" : ' target="_blank" rel="noopener"') + ">" + esc(T(a[1] + "_btn")) + "</a>"
-          : '<a class="btn line" ' + Q.enqAttrs("Other", "Video Course", name + " ka link chahiye.") + ">" + esc(T("app_ask")) + "</a>")
+          : '<a class="btn line" ' + Q.enqAttrs("Other", "Video Course", "Please share the link for the " + name + ".") + ">" + esc(T("app_ask")) + "</a>")
         + "</div>";
     }).join("");
   }
@@ -229,7 +229,7 @@
     $("book-title").textContent = get("book_title");
     $("book-desc").textContent = get("book_desc");
     $("book-points").innerHTML = Q.pairs(get("book_points")).map(function (p) { return "<span>" + icon("check") + esc(p[0]) + "</span>"; }).join("");
-    $("book-btn").dataset.msg = get("book_title") + " order karni hai.";
+    $("book-btn").dataset.msg = "I want to order " + get("book_title") + ".";
 
     if (get("phone")) {
       document.querySelectorAll("[data-phone]").forEach(function (el) { el.textContent = get("phone"); });
@@ -254,7 +254,7 @@
 
   /* ---------- load from Supabase ---------- */
   function failed() {
-    var t = "Abhi list load nahi ho saki. Thodi der baad dobara dekhein ya humein call karein.";
+    var t = "Unable to load the list right now. Please try again in a little while or call us.";
     $("course-grid").innerHTML = note(t);
     $("test-grid").innerHTML = note(t);
     renderApps();
@@ -287,25 +287,25 @@
   /* ---------- enquiry form ---------- */
   var form = $("enq-form"), msg = $("enq-msg"), btn = $("enq-btn");
   function say(text, ok) { msg.textContent = text; msg.className = "msg " + (ok ? "ok" : "err"); }
-  var thanks = "Dhanyavaad! Aapki enquiry mil gayi hai, hamari team jald call karegi.";
+  var thanks = "Thank you! We have received your enquiry. Our team will call you shortly.";
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var name = $("f-name").value.trim(), phone = $("f-phone").value.replace(/\D/g, "");
-    if (name.length < 2) return say("Kripya apna naam likhein.");
-    if (!/^[6-9]\d{9}$/.test(phone)) return say("Mobile number 10 digit ka sahi number hona chahiye.");
+    if (name.length < 2) return say("Please enter your name.");
+    if (!/^[6-9]\d{9}$/.test(phone)) return say("Please enter a valid 10-digit mobile number.");
     if ($("f-web").value) { form.reset(); return say(thanks, true); } // honeypot: bots yeh field bharte hain
-    if (!sb) return say("Enquiry nahi bheji ja saki. Kripya humein call ya WhatsApp karein.");
+    if (!sb) return say("Your enquiry could not be sent. Please call or WhatsApp us.");
 
     btn.disabled = true;
     sb.from("enquiries").insert({
       name: name.slice(0, 60), phone: phone, exam: $("f-exam").value.slice(0, 30), interest: $("f-interest").value,
       city: $("f-city").value.trim().slice(0, 60), message: $("f-msg").value.trim().slice(0, 500)
     }).then(function (r) {
-      if (r.error) say("Enquiry nahi bheji ja saki. Dobara koshish karein ya humein call karein.");
+      if (r.error) say("Your enquiry could not be sent. Please try again or call us.");
       else { form.reset(); say(thanks, true); }
     }).catch(function () {
-      say("Enquiry nahi bheji ja saki. Internet check karke dobara koshish karein.");
+      say("Your enquiry could not be sent. Please check your internet connection and try again.");
     }).then(function () { btn.disabled = false; });
   });
 })();

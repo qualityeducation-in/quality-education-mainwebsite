@@ -23,7 +23,7 @@
     var grid = $("all-grid");
     if (type === "reels") {
       grid.className = "reels wrap-all";
-      grid.innerHTML = rows.map(Q.reelHtml).join("") || note("Abhi koi video nahi hai.");
+      grid.innerHTML = rows.map(Q.reelHtml).join("") || note("No videos available yet.");
       return;
     }
     // Exam ke filter button, usi kram mein jis kram mein exams ki list hai.
@@ -39,7 +39,7 @@
       }).join("") : "";
     var shown = rows.filter(function (x) { return !filter || x.exam === filter; });
     $("all-count").textContent = shown.length ? shown.length + " items" : "";
-    grid.innerHTML = shown.map(function (x) { return Q.cardHtml(x, info.interest); }).join("") || note("Abhi yahan kuch nahi hai.");
+    grid.innerHTML = shown.map(function (x) { return Q.cardHtml(x, info.interest); }).join("") || note("Nothing here yet.");
   }
 
   $("all-chips").addEventListener("click", function (e) {
@@ -49,7 +49,7 @@
 
   function failed() {
     heading();
-    $("all-grid").innerHTML = note("Abhi list load nahi ho saki. Thodi der baad dobara dekhein.");
+    $("all-grid").innerHTML = note("Unable to load the list right now. Please try again in a little while.");
   }
 
   if (!sb) return failed();

@@ -58,7 +58,7 @@
       + (meta ? '<div class="c-meta">' + meta + "</div>" : "")
       + '<div class="c-foot">' + price + '<span class="btns">'
       + (embed ? '<button class="btn line sm" type="button" data-embed="' + esc(embed) + '">' + esc(T("btn_demo")) + "</button>" : "")
-      + '<a class="btn sm" ' + Q.enqAttrs(x.exam, interest, x.title + (isBook ? " order karni hai." : " ke baare mein jaankari chahiye.")) + ">"
+      + '<a class="btn sm" ' + Q.enqAttrs(x.exam, interest, (isBook ? "I want to order " : "I would like more information about ") + x.title + ".") + ">"
       + esc(T(isBook ? "btn_order" : "btn_enquire")) + "</a></span></div></div></article>";
   };
 
@@ -131,7 +131,7 @@
       f.style.cssText = "width:" + (w / k) + "px;height:" + (h / k) + "px;transform:scale(" + k + ");transform-origin:0 0";
     }
     card.classList.add("playing");
-    card.innerHTML = '<button class="r-close" type="button" aria-label="Video band karein">✕</button>';
+    card.innerHTML = '<button class="r-close" type="button" aria-label="Close video">✕</button>';
     card.appendChild(f);
   }
 
