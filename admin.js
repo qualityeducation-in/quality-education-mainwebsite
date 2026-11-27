@@ -83,7 +83,7 @@
     ["Statistics (one per line: number|label)", [
       ["hero_stats", "Hero statistics (4)", true], ["result_stats", "Results statistics", true]]],
     ["Book section", [
-      ["book_title", "Book title (leave empty to hide the banner)"], ["book_desc", "Book description", true],
+      ["book_title", "Book title (leave empty to hide the whole book banner)"], ["book_desc", "Book description", true],
       ["book_points", "Highlights (one per line)", true]]],
     ["App and Social Links (leave empty to hide)", [
       ["play_url", "Play Store link"], ["ios_url", "App Store link"], ["windows_url", "Windows app link"],
@@ -391,7 +391,23 @@
         + '<label class="check"><input type="checkbox" id="logo-only"' + (s.logo_only === "1" ? " checked" : "") + "> Show only the logo (hide the institute name and tagline beside it)</label>"
         + "<small>The logo appears in the header of every page and as the browser tab icon. A PNG with a transparent background works best, at least 400 px wide. JPG, PNG or WebP. Without a logo, the default QE mark is shown.</small>"
         + '</div></div><button class="btn" type="submit" id="logo-save">Save Logo</button></form>';
-      view.innerHTML = '<h1>Settings</h1>' + logoPanel + '<form class="panel" id="s-form">' + SETTINGS.map(function (g) {
+      var bimg = Q.safeLink(s.book_image);
+      var bk = function (id, key, label) {
+        return "<label>" + label + '<input id="' + id + '" maxlength="60" value="' + esc((s["t_" + key] || "").trim() || Q.TEXT[key]) + '"></label>';
+      };
+      var bookPanel = '<form class="panel" id="book-form"><h2>Book Banner (the large book box on the home page)</h2><div class="imgrow">'
+        + '<div class="thumb bookimg" id="e-book_image-box">' + (bimg ? '<img src="' + esc(bimg) + '" alt="">' : "<span>No image</span>") + "</div>"
+        + '<div class="imgctl"><span class="lbl">Book image</span><input type="file" id="e-book_image-file" accept="image/png,image/jpeg,image/webp" aria-label="Book image">'
+        + '<input type="hidden" id="e-book_image" value="' + esc(bimg) + '">'
+        + '<button class="link del" type="button" data-clear-img="book_image"' + (bimg ? "" : " hidden") + ">Remove image</button>"
+        + "<small>Upload a photo of the book cover. It replaces the blue sample cover on the website. A portrait image about 600 × 800 works best. JPG, PNG or WebP. Without an image, the blue cover with the text below is shown.</small></div></div>"
+        + '<h2>Text on the blue cover (used only when no image is uploaded)</h2><div class="fields">'
+        + bk("bk-top", "cover_top", "Top text") + bk("bk-title", "cover_title", "Title") + bk("bk-sub", "cover_sub", "Subtitle") + bk("bk-badge", "cover_badge", "Badge")
+        + '<label class="check full"><input type="checkbox" id="bk-hide"' + (s.book_cover_hide === "1" ? " checked" : "") + "> Hide all text on the cover</label></div>"
+        + '<h2>Button</h2><div class="fields"><label class="full">Buy link for the banner button. Leave empty to open the enquiry form instead<input id="bk-buy" maxlength="500" value="' + esc(s.book_buy_url) + '"></label></div>'
+        + '<small class="help" style="display:block;margin-bottom:14px">The book title, description and highlights are in the "Book section" box further down. The button text is under Website Text &gt; Books section.</small>'
+        + '<button class="btn" type="submit" id="book-save">Save Book Banner</button></form>';
+      view.innerHTML = '<h1>Settings</h1>' + logoPanel + bookPanel + '<form class="panel" id="s-form">' + SETTINGS.map(function (g) {
         return "<h2>" + esc(g[0]) + '</h2><div class="fields">' + g[1].map(function (f) {
           return f[2] ? '<label class="full">' + esc(f[1]) + '<textarea id="s-' + f[0] + '" rows="4">' + esc(s[f[0]]) + "</textarea></label>"
             : "<label>" + esc(f[1]) + '<input id="s-' + f[0] + '" value="' + esc(s[f[0]]) + '"></label>';
@@ -472,6 +488,22 @@
   view.addEventListener("submit", function (e) {
     e.preventDefault();
     if (e.target.id === "e-form") return saveEntity();
+    if (e.target.id === "book-form") {
+      var bf = $("e-book_image-file").files[0], bbtn = $("book-save"), blink = $("bk-buy").value.trim();
+      if (blink && !Q.safeLink(blink)) return flash("The buy link must start with https://", true);
+      bbtn.disabled = true; bbtn.textContent = bf ? "Uploading…" : "Saving…";
+      (bf ? uploadImage(bf, "book", { max: 900, keepPng: true }) : Promise.resolve($("e-book_image").value)).then(function (url) {
+        var rows = [{ k: "book_image", v: url || "" }, { k: "book_cover_hide", v: $("bk-hide").checked ? "1" : "" }, { k: "book_buy_url", v: blink }];
+        [["bk-top", "cover_top"], ["bk-title", "cover_title"], ["bk-sub", "cover_sub"], ["bk-badge", "cover_badge"]].forEach(function (p) {
+          var v = $(p[0]).value.trim();
+          rows.push({ k: "t_" + p[1], v: v === Q.TEXT[p[1]] ? "" : v });
+        });
+        return sb.from("settings").upsert(rows);
+      }).then(function (r) {
+        if (r.error) throw r.error;
+        flash("Book banner saved. Refresh the website to see the change."); loadSettings();
+      }).catch(function (err) { bbtn.disabled = false; bbtn.textContent = "Save Book Banner"; fail(err); });
+    }
     if (e.target.id === "logo-form") {
       var lf = $("e-logo_url-file").files[0], lbtn = $("logo-save");
       lbtn.disabled = true; lbtn.textContent = lf ? "Uploading…" : "Saving…";

@@ -95,3 +95,6 @@ small.help{color:var(--muted);font-weight:400;font-size:.82rem;line-height:1.5}
 .thumb.logo{width:180px;aspect-ratio:auto;height:96px;background:repeating-conic-gradient(#EEF1F8 0 25%,#fff 0 50%) 0 0/16px 16px}
 .thumb.logo img{object-fit:contain;padding:8px}
 #logo-form .imgctl label.check{font-weight:600}
+.thumb.bookimg{width:120px;aspect-ratio:3/4}
+.thumb.bookimg img{object-fit:contain}
+.imgctl .lbl{font-weight:600;font-size:.88rem}
