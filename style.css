@@ -472,3 +472,24 @@ nav>a,.connect>button{padding:8px 8px;font-size:.9rem}
   .chips#res-tabs{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;margin:0 -16px 16px;padding:0 16px;scrollbar-width:none}
   .prose{font-size:1rem}
 }
+
+/* ---------- hero: app screenshots ka curve ---------- */
+.stage.shots{display:block;min-height:0;padding-top:6px}
+.cf{position:relative;height:462px;perspective:1300px;perspective-origin:50% 45%}
+.ph{position:absolute;left:50%;top:0;width:212px;aspect-ratio:9/19.5;margin:0 0 0 -106px;padding:7px;border-radius:32px;background:#0B1026;box-shadow:0 30px 60px -24px #000,inset 0 0 0 2px #2A3566;cursor:pointer;transition:transform .75s cubic-bezier(.22,.7,.2,1),opacity .5s,filter .5s;filter:brightness(.62);will-change:transform}
+.ph.on{filter:none;cursor:default}
+.ph-in{display:block;width:100%;height:100%;border-radius:25px;overflow:hidden;background:#fff}
+.ph img,.ph video{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.cf-cap{text-align:center;margin-top:14px;font-family:var(--display);font-weight:700;font-size:.95rem;color:#fff}
+.cf-dots{display:flex;justify-content:center;gap:7px;margin-top:10px}
+.cf-dots button{width:8px;height:8px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.3);transition:width .3s,background .3s}
+.cf-dots button[aria-current="true"]{width:22px;border-radius:99px;background:var(--saffron-2)}
+@media (max-width:960px){.stage.shots{max-width:560px;margin:0 auto;width:100%}}
+@media (max-width:640px){
+  .cf{height:400px}
+  .ph{width:184px;margin-left:-92px;padding:6px;border-radius:27px}
+  .ph-in{border-radius:21px}
+  .cf-cap{font-size:.9rem;margin-top:12px}
+}
+@media (prefers-reduced-motion:reduce){.ph{transition:none!important}}
+@media (min-width:961px){.hero-in{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}}

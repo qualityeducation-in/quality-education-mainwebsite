@@ -74,13 +74,10 @@
       ["hero_h1_b", "Badi heading: aakhri hissa", "& Rajasthan Govt Exams"],
       ["hero_lead", "Heading ke neeche ki line", "Live classes, recorded courses, test series, books, current affairs, toppers strategy and daily motivation in one premium learning platform.", true],
       ["hero_btn1", "Pehla button", "Explore Courses"], ["hero_btn2", "Doosra button", "Attempt Free Test"]]],
-    ["Hero ka phone wala design", [
-      ["ph_tag", "Phone: chhota tag", "New Batch"], ["ph_title", "Phone: title", "LDC 2026 Complete Course"],
-      ["ph_sub", "Phone: neeche ki line", "Live + Recorded + Tests + PDF Notes"],
-      ["ph_r1", "Phone: line 1", "Science Class"], ["ph_r1b", "Phone: line 1 ka tag", "Live"],
-      ["ph_r2", "Phone: line 2", "Mock Test"], ["ph_r2b", "Phone: line 2 ka tag", "Today"],
-      ["ph_r3", "Phone: line 3", "Strategy Reel"], ["ph_r3b", "Phone: line 3 ka tag", "New"],
-      ["fl1", "Tairta card 1", "Rank Analysis"], ["fl2", "Tairta card 2", "Faculty Reels"], ["fl3", "Tairta card 3", "Free PDFs"]]],
+    ["Hero ke app screenshots (phone ke neeche ka naam)", [
+      ["shot1", "Screen 1", "Home Screen"], ["shot2", "Screen 2", "Daily Free Test"], ["shot3", "Screen 3", "Test Attempt"],
+      ["shot4", "Screen 4", "Submit Screen"], ["shot5", "Screen 5", "Result"], ["shot6", "Screen 6", "Subject Wise Analysis"],
+      ["shot7", "Screen 7", "Leaderboard"], ["shot8", "Screen 8 (video)", "Class Recording"], ["shot9", "Screen 9", "Download Option"]]],
     ["Courses section", [
       ["courses_eyebrow", "Chhoti heading", "Premium Learning Programs"], ["courses_title", "Badi heading", "Featured Courses"],
       ["chip_all", "Filter ka pehla button", "All"],

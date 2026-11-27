@@ -56,6 +56,64 @@
   window.addEventListener("resize", updateSliders);
   window.addEventListener("load", updateSliders);
 
+  /* ---------- hero: app ke screenshots ka ghoomta hua curve ---------- */
+  // Beech wala phone bada aur aage, dono taraf ke phone peeche aur tirchhe. 1 se 9 ke kram mein apne aap ghoomta hai.
+  var shots = (function () {
+    var cf = $("cf"), phones = [].slice.call(cf.querySelectorAll(".ph")), n = phones.length;
+    var dots = $("cf-dots"), cap = $("cf-cap"), cur = 0, timer = null, held = false;
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    dots.innerHTML = phones.map(function (p, i) { return '<button type="button" data-go="' + i + '" aria-label="Screen ' + (i + 1) + '"></button>'; }).join("");
+
+    function layout() {
+      var small = window.innerWidth < 700; // phone par 3 phone, bade screen par 5
+      var step = small ? 78 : 98, show = small ? 1 : 2; // beech se kitni door, aur dono taraf kitne phone dikhein
+      phones.forEach(function (p, i) {
+        var d = i - cur;
+        if (d > n / 2) d -= n;
+        if (d < -n / 2) d += n;
+        var a = Math.abs(d), on = a <= show;
+        p.style.transform = "translateX(" + (d * step) + "px) translateZ(" + (-a * 95) + "px) rotateY(" + (-d * 15) + "deg)";
+        p.style.zIndex = 20 - a;
+        p.style.opacity = on ? 1 : 0;
+        p.style.pointerEvents = on ? "auto" : "none";
+        p.classList.toggle("on", d === 0);
+      });
+      dots.querySelectorAll("button").forEach(function (b, i) { b.setAttribute("aria-current", i === cur); });
+      cap.textContent = T(phones[cur].dataset.cap) || phones[cur].dataset.default;
+    }
+    function next() {
+      clearTimeout(timer);
+      if (still || held || document.hidden) return;
+      // Video wala phone beech mein ho to use poora chalne ka samay milta hai.
+      timer = setTimeout(function () { go(cur + 1); }, phones[cur].querySelector("video") ? 9000 : 2600);
+    }
+    function go(i) { cur = (i % n + n) % n; layout(); next(); }
+
+    cf.addEventListener("click", function (e) { var p = e.target.closest(".ph"); if (p) go(phones.indexOf(p)); });
+    dots.addEventListener("click", function (e) { var b = e.target.closest("[data-go]"); if (b) go(Number(b.dataset.go)); });
+    var stage = cf.parentNode;
+    stage.addEventListener("mouseenter", function () { held = true; clearTimeout(timer); });
+    stage.addEventListener("mouseleave", function () { held = false; next(); });
+    document.addEventListener("visibilitychange", next);
+    window.addEventListener("resize", layout);
+
+    // Ungli se side mein khiskane par agla / pichhla phone.
+    var x0 = null;
+    cf.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    cf.addEventListener("touchend", function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if (Math.abs(dx) > 30) go(cur + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+
+    // Kuch phone video ko apne aap nahi chalate; ek baar koshish kar lete hain.
+    var v = cf.querySelector("video");
+    if (v) { v.muted = true; var pl = v.play(); if (pl && pl.catch) pl.catch(function () {}); }
+
+    go(0);
+    return { refresh: layout };
+  })();
+
   /* ---------- rendering ---------- */
   var note = function (t) { return '<p class="load-note">' + t + "</p>"; };
   var ofKind = function (k) { return ITEMS.filter(function (x) { return x.kind === k; }); };
@@ -150,6 +208,7 @@
 
     buildExams();
     Q.applyTexts();
+    shots.refresh();
     document.title = T("brand_name") + " | " + T("brand_tag");
 
     $("notice-text").textContent = get("notice_text");
