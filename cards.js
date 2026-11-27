@@ -17,7 +17,36 @@
   var T = Q.T = function (key) { return (Q.SET["t_" + key] || "").trim() || Q.TEXT[key] || ""; };
   Q.applyTexts = function () {
     document.querySelectorAll("[data-t]").forEach(function (el) { el.textContent = T(el.dataset.t); });
+    applyLogo(Q.safeLink(Q.SET.logo_url), Q.SET.logo_only === "1");
+    try { localStorage.setItem("qe_logo", JSON.stringify([Q.safeLink(Q.SET.logo_url), Q.SET.logo_only === "1"])); } catch (e) {}
   };
+
+  // Logo (admin > Settings se). Header mein QE wale nishaan ki jagah lagta hai, aur browser tab ke icon mein bhi.
+  var markHtml = null;
+  function applyLogo(url, only) {
+    document.querySelectorAll("header .brand").forEach(function (brand) {
+      var mark = brand.querySelector(".brand-mark");
+      if (!mark) return;
+      if (markHtml === null) markHtml = mark.innerHTML;
+      mark.classList.toggle("has-logo", !!url);
+      brand.classList.toggle("logo-only", !!url && only);
+      if (url) {
+        var img = mark.querySelector("img");
+        if (!img) { mark.innerHTML = '<img alt="">'; img = mark.firstChild; }
+        if (img.getAttribute("src") !== url) img.src = url;
+        img.alt = only ? T("brand_name") : "";
+      } else if (mark.querySelector("img")) {
+        mark.innerHTML = markHtml;
+      }
+    });
+    var icon = document.querySelector('link[rel="icon"]');
+    if (url) {
+      if (!icon) { icon = document.createElement("link"); icon.rel = "icon"; document.head.appendChild(icon); }
+      icon.href = url;
+    } else if (icon) { icon.remove(); }
+  }
+  // Pichhli baar ka logo turant dikha dete hain, taaki page khulte hi purana nishaan na jhalke.
+  try { var saved = JSON.parse(localStorage.getItem("qe_logo") || "null"); if (saved && saved[0]) applyLogo(Q.safeLink(saved[0]), !!saved[1]); } catch (e) {}
 
   // Har tarah ki list ki jaankari. "type" wahi hai jo all.html?type=... mein aata hai.
   Q.TYPES = {

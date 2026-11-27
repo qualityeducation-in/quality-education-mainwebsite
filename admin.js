@@ -332,18 +332,20 @@
 
   /* ---------- thumbnail upload (Supabase Storage, bucket "thumbs") ---------- */
   // Badi photo ko 1200px chaudai tak chhota karke JPG banata hai, taaki website halki rahe.
-  function shrinkImage(file) {
+  function shrinkImage(file, opts) {
+    opts = opts || {};
+    var png = opts.keepPng && file.type !== "image/jpeg";
     return new Promise(function (resolve) {
       var img = new Image(), src = URL.createObjectURL(file);
       img.onload = function () {
         URL.revokeObjectURL(src);
-        var scale = Math.min(1, 1200 / img.naturalWidth);
+        var scale = Math.min(1, (opts.max || 1200) / img.naturalWidth);
         var c = document.createElement("canvas");
         c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
         var ctx = c.getContext("2d");
-        ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+        if (!png) { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height); }
         ctx.drawImage(img, 0, 0, c.width, c.height);
-        c.toBlob(function (b) { resolve(b || file); }, "image/jpeg", 0.86);
+        c.toBlob(function (b) { resolve(b || file); }, png ? "image/png" : "image/jpeg", 0.86);
       };
       img.onerror = function () { URL.revokeObjectURL(src); resolve(file); };
       img.src = src;
@@ -359,10 +361,10 @@
       return sb.storage.from("docs").getPublicUrl(path).data.publicUrl;
     });
   }
-  function uploadImage(file, folder) {
+  function uploadImage(file, folder, opts) {
     if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return Promise.reject({ message: "Only JPG, PNG or WebP images are allowed." });
     if (file.size > 8 * 1024 * 1024) return Promise.reject({ message: "The image must be smaller than 8 MB." });
-    return shrinkImage(file).then(function (blob) {
+    return shrinkImage(file, opts).then(function (blob) {
       var ext = blob.type === "image/jpeg" ? "jpg" : (blob.type === "image/png" ? "png" : "webp");
       var path = folder + "/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
       return sb.storage.from("thumbs").upload(path, blob, { contentType: blob.type, cacheControl: "31536000" }).then(function (r) {
@@ -379,7 +381,16 @@
       var s = {};
       (r.data || []).forEach(function (row) { s[row.k] = row.v; });
       if (!(s.exams || "").trim()) s.exams = Q.EXAMS.filter(function (x) { return x !== "Other"; }).join("\n");
-      view.innerHTML = '<h1>Settings</h1><form class="panel" id="s-form">' + SETTINGS.map(function (g) {
+      var logo = Q.safeLink(s.logo_url);
+      var logoPanel = '<form class="panel" id="logo-form"><h2>Logo</h2><div class="imgrow">'
+        + '<div class="thumb logo" id="e-logo_url-box">' + (logo ? '<img src="' + esc(logo) + '" alt="">' : "<span>No image</span>") + "</div>"
+        + '<div class="imgctl"><input type="file" id="e-logo_url-file" accept="image/png,image/jpeg,image/webp" aria-label="Logo">'
+        + '<input type="hidden" id="e-logo_url" value="' + esc(logo) + '">'
+        + '<button class="link del" type="button" data-clear-img="logo_url"' + (logo ? "" : " hidden") + ">Remove image</button>"
+        + '<label class="check"><input type="checkbox" id="logo-only"' + (s.logo_only === "1" ? " checked" : "") + "> Show only the logo (hide the institute name and tagline beside it)</label>"
+        + "<small>The logo appears in the header of every page and as the browser tab icon. A PNG with a transparent background works best, at least 400 px wide. JPG, PNG or WebP. Without a logo, the default QE mark is shown.</small>"
+        + '</div></div><button class="btn" type="submit" id="logo-save">Save Logo</button></form>';
+      view.innerHTML = '<h1>Settings</h1>' + logoPanel + '<form class="panel" id="s-form">' + SETTINGS.map(function (g) {
         return "<h2>" + esc(g[0]) + '</h2><div class="fields">' + g[1].map(function (f) {
           return f[2] ? '<label class="full">' + esc(f[1]) + '<textarea id="s-' + f[0] + '" rows="4">' + esc(s[f[0]]) + "</textarea></label>"
             : "<label>" + esc(f[1]) + '<input id="s-' + f[0] + '" value="' + esc(s[f[0]]) + '"></label>';
@@ -460,6 +471,16 @@
   view.addEventListener("submit", function (e) {
     e.preventDefault();
     if (e.target.id === "e-form") return saveEntity();
+    if (e.target.id === "logo-form") {
+      var lf = $("e-logo_url-file").files[0], lbtn = $("logo-save");
+      lbtn.disabled = true; lbtn.textContent = lf ? "Uploading…" : "Saving…";
+      (lf ? uploadImage(lf, "logo", { max: 600, keepPng: true }) : Promise.resolve($("e-logo_url").value)).then(function (url) {
+        return sb.from("settings").upsert([{ k: "logo_url", v: url || "" }, { k: "logo_only", v: $("logo-only").checked ? "1" : "" }]);
+      }).then(function (r) {
+        if (r.error) throw r.error;
+        flash("Logo saved. Refresh the website to see the change."); loadSettings();
+      }).catch(function (err) { lbtn.disabled = false; lbtn.textContent = "Save Logo"; fail(err); });
+    }
     if (e.target.id === "t-form") {
       var trows = [];
       Q.TEXTS.forEach(function (g) { g[1].forEach(function (f) {

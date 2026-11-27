@@ -92,3 +92,6 @@ td .mini{width:72px;height:24px;object-fit:cover;border-radius:5px;display:block
 small.help{color:var(--muted);font-weight:400;font-size:.82rem;line-height:1.5}
 .imgf>.imgctl{justify-items:stretch}
 .imgf>.imgctl a{font-weight:600;font-size:.9rem}
+.thumb.logo{width:180px;aspect-ratio:auto;height:96px;background:repeating-conic-gradient(#EEF1F8 0 25%,#fff 0 50%) 0 0/16px 16px}
+.thumb.logo img{object-fit:contain;padding:8px}
+#logo-form .imgctl label.check{font-weight:600}
