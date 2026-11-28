@@ -186,9 +186,15 @@
     updateSliders();
   }
 
+  var AVATAR_M = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#DCE6FF"/><path d="M7 66c1-16 11-24.500 25-24.500S56 50 57 66z" fill="#1F3A8A"/><path d="M27 36h10v7a5 5 0 0 1-10 0z" fill="#E3AE86"/><circle cx="32" cy="27" r="11.500" fill="#F4C9A3"/><path d="M20.200 27.500C18.800 17.500 25 11.500 32.500 11.500c7.500 0 13 5.500 11.300 15.500-2.300-4.500-5.300-6.500-9.800-6.500-5.500 0-9.800 2.500-13.800 7z" fill="#262A3B"/></svg>';
+  var AVATAR_F = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#FFE3EC"/><path d="M16 31c0-13 7-20 16-20s16 7 16 20v21H16z" fill="#3B2A2E"/><path d="M7 66c1-16 11-24.500 25-24.500S56 50 57 66z" fill="#D9416B"/><path d="M27 37h10v6.500a5 5 0 0 1-10 0z" fill="#E3AE86"/><circle cx="32" cy="28" r="11" fill="#F4C9A3"/><path d="M20.800 29c-.800-9 4.700-14 11.200-14 6.500 0 12 5 11.200 14-3-4-6.500-6-11.200-6-4.700 0-8.200 2-11.200 6z" fill="#3B2A2E"/></svg>';
+
   function renderResults(rows) {
     $("result-grid").innerHTML = rows.map(function (r, i) {
-      return '<div class="stu"><div class="ava g' + (i % 4) + '">' + esc(String(r.name).charAt(0).toUpperCase()) + "</div><h4>" + esc(r.name) + "</h4><p>" + esc(r.detail) + "</p></div>";
+      // Photo ho to wahi; na ho to admin mein chune gaye gender ke hisaab se ladke ya ladki ka bana hua chitra.
+      var photo = Q.safeLink(r.image_url);
+      var pic = photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy">' : (r.gender === "female" ? AVATAR_F : AVATAR_M);
+      return '<div class="stu"><div class="ava pic">' + pic + "</div><h4>" + esc(r.name) + "</h4><p>" + esc(r.detail) + "</p></div>";
     }).join("");
   }
 

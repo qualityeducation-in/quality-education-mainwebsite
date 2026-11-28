@@ -66,10 +66,12 @@
       ]
     },
     results: {
-      label: "Results", one: "Selected Student", table: "results", fixed: {}, cols: ["name", "detail"],
+      label: "Results", one: "Selected Student", table: "results", fixed: {}, cols: ["name", "detail", "gender"],
       fields: [
         ["name", "Student name", "text", 100, true],
         ["detail", "Detail (e.g. Selected in RAS 2018)", "text", 200],
+        ["gender", "Gender (decides the default picture when no photo is uploaded)", "select", [["male", "Male"], ["female", "Female"]]],
+        ["image_url", "Student photo (optional)", "image", "Upload a clear photo of the student's face. A square image, about 400 × 400, works best. JPG, PNG or WebP. Without a photo, a male or female illustration is shown according to the gender chosen above."],
         ["sort", "Display order (lower number first)", "number"]
       ]
     }
@@ -90,7 +92,7 @@
       ["instagram", "Instagram"], ["youtube", "YouTube"], ["telegram", "Telegram"], ["whatsapp_channel", "WhatsApp Channel"],
       ["facebook", "Facebook"], ["twitter", "Twitter / X"], ["linkedin", "LinkedIn"]]]
   ];
-  var COL_LABEL = { is_active: "Status", video_url: "Demo video", url: "Link", price: "Price", category: "Section", file_url: "File", created_at: "Date" };
+  var COL_LABEL = { is_active: "Status", video_url: "Demo video", url: "Link", price: "Price", category: "Section", file_url: "File", created_at: "Date", gender: "Picture" };
 
   var S = { tab: "enquiries", edit: null, rows: [], enq: [], fq: "", fs: "" };
   var view = $("view");
@@ -271,6 +273,7 @@
       return (Q.embedUrl(r[c]) ? "Video ✓" : "Link") + " <small>" + esc(short) + "</small>";
     }
     if (c === "file_url") return r[c] ? '<a href="' + esc(Q.safeLink(r[c])) + '" target="_blank" rel="noopener">Open PDF ↗</a>' : "—";
+    if (c === "gender") return (r.image_url ? "Photo" : "Illustration") + " · " + (r[c] === "female" ? "Female" : "Male");
     if (c === "created_at") return esc(fmtDate(r[c]).split(",")[0]);
     if (c === "category") {
       var cat = Q.DOC_CATS.filter(function (x) { return x[0] === r[c]; })[0];
